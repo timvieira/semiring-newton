@@ -34,15 +34,17 @@ class Chart:
         return v
     def copy(self):
         return self.spawn() + self
+    def trim(self):
+        return Chart(self.semiring, {k: v for k, v in self._vals.items() if v != self.semiring.zero})
     def metric(self, other):
         assert isinstance(other, Chart)
         err = 0
         for x in self._vals.keys() | other._vals.keys():
-            err = max(err, self[x].metric(other[x]))
+            err = max(err, self.semiring.metric(self[x], other[x]))
         return err
     def _repr_html_(self):
         return ('<div style="font-family: Monospace;">'
-                + format_table(self.items(), headings=['key', 'value'])
+                + format_table(self.trim().items(), headings=['key', 'value'])
                 + '</div>')
     def __repr__(self):
-        return repr({k: v for k,v in self.items() if v != self.semiring.zero})
+        return repr({k: v for k, v in self._vals.items() if v != self.semiring.zero})
