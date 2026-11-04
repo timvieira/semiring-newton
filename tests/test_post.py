@@ -102,6 +102,22 @@ def test_viterbi_example():
     assert iterates[1].metric(have) == 0
 
 
+def test_catalan_example():
+    # X = X X + c: the least solution is the smaller root, (1 - sqrt(1 - 4c)) / 2,
+    # and its series is c + c^2 + 2c^3 + 5c^4 + 14c^5 + 42c^6 + ...
+    c = 0.2
+    cfg = CFG.from_string(f"""
+    1: X → X X
+    {c}: X → a
+    """, Real, start='X')
+    assert abs(newton(cfg)['X'].score - (1 - (1 - 4*c)**0.5) / 2) < 1e-10
+    x = [0]*8            # truncated power series in c, by fixpoint iteration
+    for _ in range(8):
+        sq = [sum(x[i]*x[n-i] for i in range(n+1)) for n in range(8)]
+        x = [sq[n] + (n == 1) for n in range(8)]
+    assert x[1:7] == [1, 1, 2, 5, 14, 42]
+
+
 def test_post_code_matches_source():
     post = POST.read_text()
     blocks = re.findall(r'```python\n(.*?)```', post, re.DOTALL)
