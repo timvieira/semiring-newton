@@ -28,6 +28,8 @@ status: draft
 \newcommand{\sem}[1]{{\color{magenta}{\llbracket}}#1{\color{magenta}{\rrbracket}}}
 \newcommand{\deriv}{\boldsymbol{\delta}}
 \newcommand{\w}{{\color{magenta}{w}}}
+\newcommand{\val}{{\color{magenta}{v}}}
+\newcommand{\AddRule}{\textbf{add } }
 \newcommand{\Values}{{\color{magenta}{\mathbb{V}}}}
 \newcommand{\Series}{\Values\langle\!\langle \Sigma^* \rangle\!\rangle}
 \newcommand{\KleeneStar}{{\color{#332288}{\star}}}
@@ -50,7 +52,7 @@ status: draft
 .theorem { border-left: 3px solid #c9c2b8; padding: 0.6em 1em; margin: 1.2em 0; background: #fbf8f3; }
 .theorem > :first-child { margin-top: 0; }
 .theorem > :last-child { margin-bottom: 0; }
-.pseudocode mjx-container[display="true"] { text-align: left !important; margin-left: 0.5em !important; }
+.pseudocode mjx-container[display="true"] { text-align: left !important; margin-left: 0.5em !important; font-size: 90% !important; overflow-x: auto; overflow-y: hidden; }
 </style>
 
 <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px 16px; margin-bottom: 1.5em; border-radius: 4px; font-size: 0.95em;"><p style="margin: 0;"><strong>Draft</strong> — This article is a work in progress. Content may change.</p></div>
@@ -84,24 +86,24 @@ with $\sem{a} = \semione$ for each terminal $a \in \Sigma$.  Note that $\sem{X}$
 
 ## Grammars are algebraic systems
 
-The fixpoint equations of a grammar are an instance of a classical object: an **algebraic system** of equations over a semiring (Chomsky and Schützenberger, 1963; [Esparza et al., 2007](https://doi.org/10.1007/978-3-540-73208-2_17); [Schlund, 2016](https://mediatum.ub.tum.de/doc/1273784/1273784.pdf)).  Fix a semiring $\mathbb{S}$ and a set of variables $\mathcal{X} = \{X_1, \ldots, X_n\}$.  A *monomial* is a finite product of constants from $\mathbb{S}$ and variables, such as $c \otimes X_1 \otimes X_2$; a *polynomial* is a finite sum of monomials; and an algebraic system is a system of equations
+The fixpoint equations of a grammar are an instance of a classical object: an **algebraic system** of equations over a semiring (Chomsky and Schützenberger, 1963; [Esparza et al., 2007](https://doi.org/10.1007/978-3-540-73208-2_17); [Schlund, 2016](https://mediatum.ub.tum.de/doc/1273784/1273784.pdf)).  Fix a semiring $\mathbb{S}$ and a vector of $\mathbb{S}$-valued variables $\boldsymbol{x} = (x_1, \ldots, x_n)$.  A *monomial* is a finite product of constants from $\mathbb{S}$ and variables, such as $c \otimes x_1 \otimes x_2$; a *polynomial* is a finite sum of monomials; and an algebraic system is a system of equations
 
 $$
-\boldsymbol{X} = \boldsymbol{f}(\boldsymbol{X}),
+\boldsymbol{x} = \boldsymbol{f}(\boldsymbol{x}),
 $$
 
-where each component $f_X$ is a polynomial.  The grammar problem and the algebraic problem are essentially the same problem, but we have to be careful about *which* semiring $\mathbb{S}$ the system lives in, because there are two natural choices.  They differ in what happens to the terminals:
+where each component $f_i$ is a polynomial.  To turn a grammar into an algebraic system, we introduce one variable $x_X$ for each nonterminal $X$.  (The nonterminal $X$ is a symbol; the variable $x_X$ stands for a semiring value.)  The grammar problem and the algebraic problem are essentially the same problem, but we have to be careful about *which* semiring $\mathbb{S}$ the system lives in, because there are two natural choices.  They differ in what happens to the terminals:
 
 * **Weights only, $\mathbb{S} = \Values$.**  Each terminal is replaced by $\semione$, so it drops out of the monomial.  The least solution is the total weight $\sem{X}$ defined above.
 * **Weighted languages, $\mathbb{S} = \Series$.**  Here $\Series$ is the semiring of *weighted languages* (formal power series), i.e., functions $L : \Sigma^* \to \Values$, with $\oplus$ taken pointwise and $\otimes$ given by concatenation, $(L \otimes L')(s) = \bigoplus_{s = u\,v} L(u) \otimes L'(v)$.  A rule weight $\w$ becomes the series that gives the empty string weight $\w$, and a terminal $a$ becomes the series that gives the one-symbol string $a$ weight $\semione$.  The least solution $L_X$ assigns each string $s$ the total weight of the derivations of $X$ that yield $s$.
 
 | grammar | system over $\Values$ (weights only) | system over $\Series$ (weighted languages) |
 |:--------|:-------------------------------------|:-------------------------------------------|
-| nonterminal $X$ | variable $X$ | variable $X$ |
+| nonterminal $X$ | variable $x_X$ | variable $x_X$ |
 | terminal $a$ | $\semione$ (drops out) | the series $a$ (string $a$ with weight $\semione$) |
-| rule $X \xrightarrow{\w} Y_1 \cdots Y_K$ | monomial $\w \otimes \mathop{\bigcirc}_{Y_k \in \mathcal{N}} Y_k$ in $f_X$ | monomial $\w\, Y_1 \cdots Y_K$ in $f_X$, in order |
+| rule $X \xrightarrow{\w} Y_1 \cdots Y_K$ | monomial $\w \otimes \mathop{\bigcirc}_{Y_k \in \mathcal{N}} x_{Y_k}$ in $f_X$ | monomial $\w\, \hat{Y}_1 \cdots \hat{Y}_K$ in $f_X$, in order, where $\hat{Y} = x_Y$ for a nonterminal and $\hat{a} = a$ for a terminal |
 | derivation $\deriv$ with yield $s$ | the term $\w(\deriv)$ | the term $\w(\deriv)\, s$ |
-| least solution, $X$ component | $\sem{X} \in \Values$ | $L_X \in \Series$ |
+| least solution, $x_X$ component | $\sem{X} \in \Values$ | $L_X \in \Series$ |
 
 The two are related by forgetting the strings: $\sem{X} = \bigoplus_{s \in \Sigma^*} L_X(s)$, i.e., the image of $L_X$ under the homomorphism that sends every terminal to $\semione$.  When $\Values$ is the boolean semiring, a weighted language is just a formal language, $L_X$ is the language generated by $X$, and the least-solution characterization is the observation of Chomsky and Schützenberger.
 
@@ -119,12 +121,12 @@ $$
 \begin{aligned} X &\xrightarrow{1} X\,X \\ X &\xrightarrow{c} a \end{aligned}
 $$
 
-Its algebraic system is $X = X \otimes X \oplus c$.  Over the real semiring, the system admits *two* solutions: rearranging gives $X^2 - X + c = 0$, so $X \in \frac{1 \pm \sqrt{1 - 4\,c}}{2}$ by the quadratic formula.  Assuming $0 \le c \le \frac{1}{4}$, the smaller solution $\frac{1 - \sqrt{1 - 4\,c}}{2}$ corresponds to the sum over derivations.  The larger solution $\frac{1 + \sqrt{1 - 4\,c}}{2}$ is a fixpoint, but it is not equal to the sum over derivations.
+Its algebraic system is $x_X = x_X \otimes x_X \oplus c$.  Over the real semiring, the system admits *two* solutions: rearranging gives $x_X^2 - x_X + c = 0$, so $x_X \in \frac{1 \pm \sqrt{1 - 4\,c}}{2}$ by the quadratic formula.  Assuming $0 \le c \le \frac{1}{4}$, the smaller solution $\frac{1 - \sqrt{1 - 4\,c}}{2}$ corresponds to the sum over derivations.  The larger solution $\frac{1 + \sqrt{1 - 4\,c}}{2}$ is a fixpoint, but it is not equal to the sum over derivations.
 </div>
 
 </details>
 
-The sum over derivations is the *least* solution.  In $\omega$-continuous semirings (where all the infinite sums we need are well-defined), Kleene's fixed-point theorem says that the least solution is the limit of the sequence $\boldsymbol{0}, \boldsymbol{f}(\boldsymbol{0}), \boldsymbol{f}(\boldsymbol{f}(\boldsymbol{0})), \ldots$.  Computing that sequence is **fixpoint iteration**, which initializes every nonterminal to $\semizero$ and repeatedly applies the equations above as an update until it converges.  Newton's method, too, is most naturally stated on the algebraic system: it is Newton's method for solving $\boldsymbol{X} = \boldsymbol{f}(\boldsymbol{X})$, retrofitted to semirings.  We stay with the grammar view below because it lets us talk about derivations directly.
+The sum over derivations is the *least* solution.  In $\omega$-continuous semirings (where all the infinite sums we need are well-defined), Kleene's fixed-point theorem says that the least solution is the limit of the sequence $\boldsymbol{0}, \boldsymbol{f}(\boldsymbol{0}), \boldsymbol{f}(\boldsymbol{f}(\boldsymbol{0})), \ldots$.  Computing that sequence is **fixpoint iteration**, which initializes every variable to $\semizero$ and repeatedly applies the equations above as an update until it converges.  Newton's method, too, is most naturally stated on the algebraic system: it is Newton's method for solving $\boldsymbol{x} = \boldsymbol{f}(\boldsymbol{x})$, retrofitted to semirings.  We stay with the grammar view below because it lets us talk about derivations directly.
 
 <div class="theorem" markdown="1">
 **Proposition.** The estimate at time $t$ given by fixpoint iteration equals the total value of all derivations of height $\le t$.
@@ -201,24 +203,26 @@ $$
 &\quad \textbf{for } (X \xrightarrow{\w} Y_1 \cdots Y_K) \in \mathcal{G}: \\
 &\quad\quad \Comment{\text{Base case: combine at least two derivations with dimension } \dEQ} \\
 &\quad\quad \textbf{for } 1 \le i \lt j \le K: \\
-&\quad\quad\quad \NextChange[X] \dopluseq \w \dotimes \NextChart[Y_{[:i)}] \dotimes \Change[Y_i] \dotimes \Chart[Y_{(i:j)}] \dotimes \Change[Y_j] \dotimes \Chart[Y_{(j:]}] \\
+&\quad\quad\quad \val \gets \w \dotimes \NextChart[Y_{[:i)}] \dotimes \Change[Y_i] \dotimes \Chart[Y_{(i:j)}] \dotimes \Change[Y_j] \dotimes \Chart[Y_{(j:]}] \\
+&\quad\quad\quad \AddRule (X \xrightarrow{\val} \varepsilon) \textbf{ to } \NextChange \\
 &\quad\quad \Comment{\text{Recursive case: derive } \dPP \text{ derivations by combining}} \\
 &\quad\quad \phantom{\triangleright}\ \color{grey}{\text{one } \dPP \text{ derivation with } \dLE \text{ derivations}} \\
 &\quad\quad \textbf{for } k \in [1{:}K] \textbf{ where } Y_k \text{ is a nonterminal}: \\
-&\quad\quad\quad \NextChange[X] \dopluseq \w \dotimes \NextChart[Y_{[:k)}] \dotimes Y_k \dotimes \NextChart[Y_{(k:]}] \\
+&\quad\quad\quad \val \gets \w \dotimes \NextChart[Y_{[:k)}] \dotimes \NextChart[Y_{(k:]}] \\
+&\quad\quad\quad \AddRule (X \xrightarrow{\val} Y_k) \textbf{ to } \NextChange \quad \Comment{Y_k \text{ is the single unknown}} \\
 &\quad \textbf{return } \langle \NextChart, \solveLinear{\NextChange} \rangle \quad \Comment{\text{Solve using the specialized linear solver (below)}} \\[8pt]
 &\textbf{def } \NewtonInit(\mathcal{G}): \\
 &\quad \Comment{\text{Initial set of new derivations}} \\
 &\quad \Chart \gets \NewGrammar;\ \NextChange \gets \NewGrammar \\
 &\quad \textbf{for } (X \xrightarrow{\w} Y_1 \cdots Y_K) \in \mathcal{G} \\
 &\quad\quad\quad \textbf{where } \text{at most } 1 \text{ of } Y_1, \ldots, Y_K \text{ is a nonterminal}: \\
-&\quad\quad \NextChange[X] \dopluseq \w \dotimes Y_1 \dotimesdots Y_K \\
+&\quad\quad \AddRule (X \xrightarrow{\w} Y_1 \cdots Y_K) \textbf{ to } \NextChange \\
 &\quad \textbf{return } \langle \Chart, \solveLinear{\NextChange} \rangle \quad \Comment{\text{Solve using the specialized linear solver (below)}}
 \end{aligned}
 $$
 </div>
 
-We provide pseudocode for $\Newton$ in Algorithm 1.<footnote>Our pseudocode follows [Schlund (2016, Definition 3.9)](https://mediatum.ub.tum.de/doc/1273784/1273784.pdf), which is for context-free grammars.  Here, $\Chart[Y_{(i:j)}]$ is shorthand for the product $\Chart[Y_{i+1}] \otimes \cdots \otimes \Chart[Y_{j-1}]$, and $Y_{[:i)}$ and $Y_{(j:]}$ are the children before position $i$ and after position $j$.  Terminals have value $\semione$ in $\Chart$ and $\NextChart$ and $\semizero$ in $\Change$.  In the recursive case, the nonterminal $Y_k$ is left in the rule as the single unknown, so $\NextChange$ is a *linear* grammar.</footnote>  The high-level picture of $\Newton$ is much like semi-naive forward chaining: $\Newton$ tracks its analogs of $\Chart$ and $\Change$, except here $\Chart$ is the set of dimension $\dLT$ derivations, and $\Change$ is the set of dimension $\dEQ$ derivations.  To efficiently determine the values for all $\dPP$ derivations, $\Newton$ solves a *linearized* grammar.
+We provide pseudocode for $\Newton$ in Algorithm 1.<footnote>Our pseudocode follows [Schlund (2016, Definition 3.9)](https://mediatum.ub.tum.de/doc/1273784/1273784.pdf), which is for context-free grammars.  Here, $\Chart[Y_{(i:j)}]$ is shorthand for the product $\Chart[Y_{i+1}] \otimes \cdots \otimes \Chart[Y_{j-1}]$, and $Y_{[:i)}$ and $Y_{(j:]}$ are the children before position $i$ and after position $j$.  Terminals have value $\semione$ in $\Chart$ and $\NextChart$ and $\semizero$ in $\Change$.  $\NextChange$ is a grammar: the base case adds rules $X \xrightarrow{\val} \varepsilon$ whose weights are constants from earlier iterations, and the recursive case adds rules $X \xrightarrow{\val} Y_k$ in which the nonterminal $Y_k$ is the single unknown, so $\NextChange$ is a *linear* grammar.  (Collecting the constants on both sides of $Y_k$ into one weight $\val$ reorders the product; this is where we use commutativity.)</footnote>  The high-level picture of $\Newton$ is much like semi-naive forward chaining: $\Newton$ tracks its analogs of $\Chart$ and $\Change$, except here $\Chart$ is the set of dimension $\dLT$ derivations, and $\Change$ is the set of dimension $\dEQ$ derivations.  To efficiently determine the values for all $\dPP$ derivations, $\Newton$ solves a *linearized* grammar.
 
 We discuss solving the linear subproblems below.  Unfortunately, not all subproblems $\NextChange$ can be solved exactly *and* efficiently for all semirings; important tractable special cases include commutative semirings and cases where the subproblems are either left linear or right linear.  Other cases are discussed in the literature (e.g., [Esparza et al., 2007](https://doi.org/10.1007/978-3-540-73208-2_17); [Schlund, 2016](https://mediatum.ub.tum.de/doc/1273784/1273784.pdf); [Reps et al., 2017](https://doi.org/10.1145/3024084)).  We note that fixpoint iteration methods are always available for (approximately) solving $\NextChange$; however, fixpoint iteration may not converge quickly (or at all).
 
@@ -271,7 +275,7 @@ $$
 \begin{aligned} S &\xrightarrow{\semione} a\,S\,b \\ S &\xrightarrow{\semione} \varepsilon \end{aligned}
 $$
 
-Unlike the previous example, we cannot transform this grammar into a right-linear grammar because its semiring is not commutative.  (Its weights-only system, $S = S \oplus \semione$, is easy; it is the language that is hard.)  Unfortunately, the right-linear algorithm cannot solve this grammar efficiently; we would need a general linear algorithm.
+Unlike the previous example, we cannot transform this grammar into a right-linear grammar because its semiring is not commutative.  (Its weights-only system, $x_S = x_S \oplus \semione$, is easy; it is the language that is hard.)  Unfortunately, the right-linear algorithm cannot solve this grammar efficiently; we would need a general linear algorithm.
 
 </details>
 
@@ -353,11 +357,13 @@ $$
 &\textbf{def } \SolveName(\mathcal{G}): \\
 &\quad \Chart \gets \NewGrammar \\
 &\quad \textbf{for } \sigma \in \SccName(\mathcal{G}): \quad \Comment{\text{Topologically ordered list of SCCs}} \\
-&\quad\quad \Comment{\text{Restrict } \mathcal{G} \text{ to the nonterminals in the current component, } \sigma} \\
+&\quad\quad \Comment{\text{Restrict } \mathcal{G} \text{ to the current component } \sigma} \\
 &\quad\quad \mathcal{G}' \gets \NewGrammar \\
 &\quad\quad \textbf{for } (X \xrightarrow{\w} Y_1 \cdots Y_K) \in \mathcal{G} \textbf{ where } X \in \sigma: \\
-&\quad\quad\quad \Comment{\text{Fold symbols outside } \sigma \text{ (already solved) into the weight}} \\
-&\quad\quad\quad \mathcal{G}'[X] \dopluseq \big(\w \dotimes \dbigotimes_{Y_k \notin \sigma} \Chart[Y_k]\big) \dotimes \dbigotimes_{Y_k \in \sigma} Y_k \\
+&\quad\quad\quad \Comment{\text{Fold solved symbols (outside } \sigma \text{) into the weight}} \\
+&\quad\quad\quad \val \gets \w \dotimes \dbigotimes_{Y_k \notin \sigma} \Chart[Y_k] \\
+&\quad\quad\quad \Comment{\text{Keep the symbols } Y_{k_1} \cdots Y_{k_m} \text{ of } Y_1 \cdots Y_K \text{ that are in } \sigma} \\
+&\quad\quad\quad \AddRule (X \xrightarrow{\val} Y_{k_1} \cdots Y_{k_m}) \textbf{ to } \mathcal{G}' \\
 &\quad\quad \Comment{\text{Solve the subgrammar with the best applicable method}} \\
 &\quad\quad \Chart \gets \Chart \oplus \BestSolve(\mathcal{G}') \\
 &\quad \textbf{return } \Chart
