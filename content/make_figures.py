@@ -292,69 +292,82 @@ def convergence_figure():
 
 def height_dimension_figure():
     """
-    Two derivations under 0.5: S → S S, 0.5: S → a, with every node labeled by
-    its height (h) and dimension (d): a right-branching "caterpillar" (tall
-    but dimension 1) and a balanced tree (short, but higher dimension).
+    Two derivations under S -0.5-> S S, S -0.5-> a, drawn like the derivations
+    in the dissertation: internal nodes are labeled by nonterminals (in
+    typewriter font), and the leaves are the rule weights (semiring values,
+    in magenta) and terminals.  Each nonterminal node is annotated with its
+    height (h) and dimension (d): a right-branching "caterpillar" (tall but
+    dimension 1) and a balanced tree (short, but higher dimension).
     """
-    def leaf():
-        return ('S', ['a'])
+    W8 = '0.5'
+
+    def lex():
+        return ('S', W8, ['a'])
 
     def node(*kids):
-        return ('S', list(kids))
+        return ('S', W8, list(kids))
 
-    cat = node(leaf(), node(leaf(), node(leaf(), node(leaf(), leaf()))))
-    bal = node(node(leaf(), leaf()), node(leaf(), leaf()))
+    cat = node(lex(), node(lex(), node(lex(), node(lex(), lex()))))
+    bal = node(node(lex(), lex()), node(lex(), lex()))
+
+    def is_rule(t):
+        return isinstance(t, tuple) and len(t) == 3
 
     def height(t):
-        return 0 if isinstance(t, str) else 1 + max(height(c) for c in t[1])
+        return 0 if not is_rule(t) else 1 + max(height(c) for c in t[2])
 
     def dim(t):
-        ds = [dim(c) for c in t[1] if not isinstance(c, str)]
+        ds = [dim(c) for c in t[2] if is_rule(c)]
         if not ds: return 0
         m = max(ds)
         return m if ds.count(m) == 1 else m + 1
 
-    W, H = 720, 340
+    W, H = 760, 300
     svg = SVG(W, H)
-    DIMC, HC = '#332288', GRAY
-    dy, leafgap = 46, 64
+    DIMC, HC, VALC = '#332288', GRAY, 'magenta'
+    dy, gap = 40, 27
+    TT = 'font-family="ui-monospace, Menlo, Consolas, monospace"'
 
     def draw(t, x0, title):
-        # terminals get consecutive x slots; each parent sits over its children.
-        # Positions are keyed by path (tuple of child indices) from the root.
+        # leaves (weights and terminals) get consecutive x slots; each parent is
+        # centered over its children.  Positions are keyed by path from the root.
         pos, k = {}, [0]
+        def kids(t):
+            return [('w', t[1])] + t[2]           # the weight leaf comes first
         def layout(t, path):
-            if isinstance(t, str):
-                pos[path] = x0 + leafgap * k[0]; k[0] += 1
+            if is_rule(t):
+                xs = [layout(c, path + (i,)) for i, c in enumerate(kids(t))]
+                pos[path] = (xs[0] + xs[-1]) / 2
             else:
-                xs = [layout(c, path + (i,)) for i, c in enumerate(t[1])]
-                pos[path] = sum(xs) / len(xs)
+                pos[path] = x0 + gap * k[0]; k[0] += 1
             return pos[path]
         layout(t, ())
 
         def render(t, path):
-            x, y = pos[path], 50 + len(path) * dy
-            if isinstance(t, str):
-                svg.text(x, y + 5, t, size=14, italic=True)
+            x, y = pos[path], 52 + len(path) * dy
+            if not is_rule(t):
+                svg.text(x, y + 5, t, size=14, extra=' ' + TT)          # terminal
                 return
-            for i, c in enumerate(t[1]):
-                svg.line(x, y + 9, pos[path + (i,)], y + dy - 12, width=0.9)
-                render(c, path + (i,))
-            svg.add(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="10" fill="#fff" stroke="{INK}" stroke-width="1"/>')
-            svg.text(x, y + 5, 'S', size=13)
-            svg.text(x + 13, y - 6, f'<tspan fill="{HC}">h{height(t)}</tspan> '
-                     f'<tspan fill="{DIMC}" font-family="sans-serif">d{dim(t)}</tspan>', size=12, anchor='start')
+            for i, c in enumerate(kids(t)):
+                cx, cy = pos[path + (i,)], y + dy
+                svg.line(x, y + 7, cx, cy - 10, width=0.8)
+                if isinstance(c, tuple) and c[0] == 'w':
+                    svg.text(cx, cy + 5, c[1], size=12, color=VALC)     # rule weight
+                else:
+                    render(c, path + (i,))
+            svg.text(x, y + 5, t[0], size=15, extra=' ' + TT)
+            svg.text(x + 9, y - 6, f'<tspan fill="{HC}">h{height(t)}</tspan> '
+                     f'<tspan fill="{DIMC}" font-family="sans-serif">d{dim(t)}</tspan>', size=10, anchor='start')
         render(t, ())
-        svg.text(pos[()], 20, title, size=15, color=INK)
+        svg.text(pos[()], 18, title, size=14, color=INK)
 
-    # caterpillar: 5 leaves, height 5; balanced: 4 leaves, height 3
-    draw(cat, 40, 'height 5, dimension 1')
-    draw(bal, 450, 'height 3, dimension 2')
+    draw(cat, 20, 'height 5, dimension 1')
+    draw(bal, 440, 'height 3, dimension 2')
     svg.text(W / 2, H - 8, f'<tspan fill="{HC}">h</tspan> = height, '
-             f'<tspan fill="{DIMC}" font-family="sans-serif">d</tspan> = dimension', size=12, color=GRAY)
+             f'<tspan fill="{DIMC}" font-family="sans-serif">d</tspan> = dimension; '
+             f'leaves are rule weights (<tspan fill="{VALC}">magenta</tspan>) and terminals', size=12, color=GRAY)
 
     svg.save(OUT / 'height-dimension.svg', 'Height and dimension of two derivations')
-
 
 if __name__ == '__main__':
     OUT.mkdir(exist_ok=True)
