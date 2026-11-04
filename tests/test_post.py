@@ -119,5 +119,6 @@ def test_figures_are_up_to_date(tmp_path, monkeypatch):
     monkeypatch.setattr(mod, 'OUT', tmp_path)
     mod.dimension_figure()
     mod.newton_step_figure()
-    for name in ['dimension.svg', 'newton-step.svg']:
+    mod.convergence_figure()
+    for name in ['dimension.svg', 'newton-step.svg', 'convergence.svg']:
         assert (tmp_path / name).read_text() == (POST.parent / 'images' / name).read_text(), name

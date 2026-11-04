@@ -4,7 +4,7 @@ chapter 5 of the dissertation).  Run from the repo root:
 
     python content/make_figures.py
 
-Writes content/images/dimension.svg and content/images/newton-step.svg.
+Writes content/images/dimension.svg, newton-step.svg, and convergence.svg.
 """
 from pathlib import Path
 
@@ -219,7 +219,79 @@ def newton_step_figure():
     svg.save(OUT / 'newton-step.svg', 'How Newton builds dimension d+1 derivations')
 
 
+def convergence_figure():
+    """
+    Error vs. iterations for fixpoint iteration and Newton's method on the
+    Etessami–Yannakakis grammar (0.5: S → S S, 0.5: S → a), log–log axes.
+    The data comes from running the code.
+    """
+    import math
+    from leftcorner import CFG, Real
+    from newton.newton import _newton
+
+    cfg = CFG.from_string("""
+    0.5: S → S S
+    0.5: S → a
+    """, Real)
+
+    # Newton: iterate t (t = 0 is the initialization), plotted at t+1 solves
+    newton_pts = []
+    for t, (_, _, nc) in enumerate(_newton(cfg)):
+        newton_pts.append((t + 1, 1 - nc['S'].score))
+        if t == 39: break
+
+    # Fixpoint iteration: sample at log-spaced iteration counts
+    keep = sorted({int(round(10**(k/10))) for k in range(0, 51)})
+    V, fix_pts = cfg.R.chart(), []
+    for n in range(1, keep[-1] + 1):
+        V = cfg._bottom_up_step(V)
+        if n in keep:
+            fix_pts.append((n, 1 - V['S'].score))
+
+    W, H = 640, 380
+    L, R, T, B = 74, 24, 18, 58
+    svg = SVG(W, H)
+    x0, x1, y0, y1 = 0, 5, -13, 0      # log10 ranges
+    X = lambda n: L + (math.log10(n) - x0) / (x1 - x0) * (W - L - R)
+    Y = lambda e: T + (y1 - math.log10(e)) / (y1 - y0) * (H - T - B)
+    GRID, AXIS, MUTED = '#e4e0da', '#999', '#666'
+
+    for k in range(x0, x1 + 1):
+        svg.line(X(10**k), T, X(10**k), H - B, color=GRID, width=1)
+        svg.text(X(10**k), H - B + 18, f'10<tspan font-size="70%" baseline-shift="super">{k}</tspan>', size=12, color=MUTED)
+    for k in range(y0, y1 + 1, 2):
+        svg.line(L, Y(10**k), W - R, Y(10**k), color=GRID, width=1)
+        svg.text(L - 8, Y(10**k) + 4, f'10<tspan font-size="70%" baseline-shift="super">{k}</tspan>', size=12, color=MUTED, anchor='end')
+    svg.line(L, H - B, W - R, H - B, color=AXIS, width=1)
+    svg.line(L, T, L, H - B, color=AXIS, width=1)
+    svg.text((L + W - R) / 2, H - 14, 'iterations', size=13, color=MUTED)
+    svg.add(f'<text x="18" y="{(T + H - B) / 2:.1f}" font-size="13" fill="{MUTED}" text-anchor="middle" '
+            f'transform="rotate(-90 18 {(T + H - B) / 2:.1f})">error</text>')
+
+    FIX, NEWTON = '#377eb8', NEXT_CHANGE
+    def path(pts, color, dash=''):
+        d = ' '.join(f'{"M" if i == 0 else "L"} {X(n):.1f} {Y(e):.1f}' for i, (n, e) in enumerate(pts))
+        extra = f' stroke-dasharray="{dash}"' if dash else ''
+        svg.add(f'<path d="{d}" fill="none" stroke="{color}" stroke-width="2" stroke-linejoin="round"{extra}/>')
+    path(fix_pts, FIX, dash='6 4')
+    path(newton_pts, NEWTON)
+    # annotations (ink, not series color); the legend names the lines
+    svg.text(X(1e4), Y(2e-4) - 14, 'error ≈ 2/<tspan font-style="italic">n</tspan>', size=12, color=MUTED)
+    n, e = newton_pts[-1]
+    svg.text(X(n) + 10, Y(e) + 4, 'error = 2<tspan font-size="70%" baseline-shift="super">−<tspan font-style="italic">n</tspan></tspan>', size=12, color=MUTED, anchor='start')
+
+    # legend
+    lx, ly = W - R - 170, T + 16
+    svg.add(f'<line x1="{lx}" y1="{ly}" x2="{lx + 26}" y2="{ly}" stroke="{NEWTON}" stroke-width="2"/>')
+    svg.text(lx + 34, ly + 4, 'Newton', size=12, anchor='start')
+    svg.add(f'<line x1="{lx}" y1="{ly + 20}" x2="{lx + 26}" y2="{ly + 20}" stroke="{FIX}" stroke-width="2" stroke-dasharray="6 4"/>')
+    svg.text(lx + 34, ly + 24, 'fixpoint iteration', size=12, anchor='start')
+
+    svg.save(OUT / 'convergence.svg', 'Error vs. iterations: fixpoint iteration and Newton')
+
+
 if __name__ == '__main__':
     OUT.mkdir(exist_ok=True)
     dimension_figure()
     newton_step_figure()
+    convergence_figure()
