@@ -1,0 +1,5 @@
+# Satellite blog post config, read by the `blog` CLI (blog.py in timvieira/blog).
+# Output goes to output/ (gitignored) so the build never touches docs/, which
+# holds the README's image.
+content = "content"
+output = "output"

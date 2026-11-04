@@ -18,3 +18,7 @@ This package implements a solver based on Newton's method for solving fixpoint s
 
 * [Exact Recursive Probabilistic Programming](https://arxiv.org/abs/2210.01206). David Chiang, Colin McDonald, Chung-chieh Shan
 
+
+## Blog post (draft)
+
+`content/semiring-newton.md` is a draft blog post explaining the algorithm for weighted grammars. Build it with the `blog` CLI from [timvieira/blog](https://github.com/timvieira/blog) (`blog build` or `blog dev`; output goes to `output/`). `tests/test_post.py` checks the claims the post makes.

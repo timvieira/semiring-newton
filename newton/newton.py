@@ -31,7 +31,7 @@ def newton(self, T=None, verbosity=0, tol=1e-12):
 def _newton(self):
     # initial chart is empty, except for terminals
     chart = Chart(self.R, {x: self.R.one for x in self.V})
-    # initialize with dim<=1 derivations
+    # initialize with dimension-0 derivations
     change = linearize(self, chart, chart, chart, init=True)
     while True:
         next_chart = chart + change.sol
