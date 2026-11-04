@@ -28,6 +28,7 @@ status: draft
 \newcommand{\sem}[1]{{\color{magenta}{\llbracket}}#1{\color{magenta}{\rrbracket}}}
 \newcommand{\deriv}{\boldsymbol{\delta}}
 \newcommand{\Values}{{\color{magenta}{\mathbb{V}}}}
+\newcommand{\Series}{\Values\langle\!\langle \Sigma^* \rangle\!\rangle}
 \newcommand{\KleeneStar}{{\color{#332288}{\star}}}
 \newcommand{\kleene}[1]{#1^{\KleeneStar}}
 \newcommand{\dotimes}{\mathbin{\color[rgb]{0,0,.5}{\circ}}}
@@ -65,7 +66,7 @@ status: draft
 Proofs, side examples, and background are tucked into collapsible blocks (▸) for readers who want more depth.
 </div>
 
-A weighted context-free grammar $\mathcal{G}$ is a set of rules $X \xrightarrow{w} Y_1 \cdots Y_K$, each of which rewrites a nonterminal $X$ into a sequence of symbols $Y_1 \cdots Y_K$ with a weight $w \in \Values$.  It assigns a semiring value $\sem{X} \in \Values$ to each nonterminal $X$: the total weight of all derivations $\deriv$ rooted at $X$,
+A weighted context-free grammar $\mathcal{G}$ over a semiring $\Values$ has nonterminals $\mathcal{N}$, terminals $\Sigma$, and a set of rules $X \xrightarrow{w} Y_1 \cdots Y_K$, each of which rewrites a nonterminal $X \in \mathcal{N}$ into a sequence of symbols $Y_1 \cdots Y_K \in (\mathcal{N} \cup \Sigma)^*$ with a weight $w \in \Values$.  The grammar assigns a value $\sem{X} \in \Values$ to each nonterminal $X$: the total weight of all derivations $\deriv$ rooted at $X$,
 
 $$
 \sem{X} = \bigoplus_{\deriv \in \mathcal{D}(X)} w(\deriv),
@@ -77,28 +78,33 @@ $$
 \sem{X} = \bigoplus_{(X \xrightarrow{w} Y_1 \cdots Y_K) \in \mathcal{G}} w \otimes \sem{Y_1} \otimes \cdots \otimes \sem{Y_K},
 $$
 
-with $\sem{a} = \semione$ for each terminal $a$.
+with $\sem{a} = \semione$ for each terminal $a \in \Sigma$.  Note that $\sem{X}$ ignores *which strings* the derivations yield: it sums the weights of all derivations, whatever their yield.  This total weight (sometimes called the treesum or, for a PCFG, the partition function) is the quantity the algorithms below compute.
 
 
 ## Grammars are algebraic systems
 
-The fixpoint equations of a grammar are an instance of a classical object: an **algebraic system** of equations over a semiring (Chomsky and Schützenberger, 1963; [Esparza et al., 2007](https://doi.org/10.1007/978-3-540-73208-2_17); [Schlund, 2016](https://mediatum.ub.tum.de/doc/1273784/1273784.pdf)).  Fix a set of variables $\mathcal{X} = \{X_1, \ldots, X_n\}$.  A *monomial* is a finite product of semiring constants and variables, such as $a \otimes X_1 \otimes X_2$; a *polynomial* is a finite sum of monomials; and an algebraic system is a system of equations
+The fixpoint equations of a grammar are an instance of a classical object: an **algebraic system** of equations over a semiring (Chomsky and Schützenberger, 1963; [Esparza et al., 2007](https://doi.org/10.1007/978-3-540-73208-2_17); [Schlund, 2016](https://mediatum.ub.tum.de/doc/1273784/1273784.pdf)).  Fix a semiring $\mathbb{S}$ and a set of variables $\mathcal{X} = \{X_1, \ldots, X_n\}$.  A *monomial* is a finite product of constants from $\mathbb{S}$ and variables, such as $c \otimes X_1 \otimes X_2$; a *polynomial* is a finite sum of monomials; and an algebraic system is a system of equations
 
 $$
 \boldsymbol{X} = \boldsymbol{f}(\boldsymbol{X}),
 $$
 
-where each component $f_X$ is a polynomial.  The grammar problem and the algebraic problem are essentially the same problem:
+where each component $f_X$ is a polynomial.  The grammar problem and the algebraic problem are essentially the same problem, but we have to be careful about *which* semiring $\mathbb{S}$ the system lives in, because there are two natural choices.  They differ in what happens to the terminals:
 
-| grammar | algebraic system |
-|:--------|:-----------------|
-| nonterminal $X$ | variable $X$ |
-| rule $X \xrightarrow{w} Y_1 \cdots Y_K$ | monomial $w \otimes Y_1 \otimes \cdots \otimes Y_K$ in $f_X$ |
-| terminal $a$ | constant (its weight; the symbol $a$ itself in the semiring of formal languages) |
-| derivation (parse tree) $\deriv$ | a term $w(\deriv)$ in the expansion of the solution |
-| total weight $\sem{X}$ of all derivations of $X$ | the $X$ component of the least solution |
+* **Weights only, $\mathbb{S} = \Values$.**  Each terminal is replaced by $\semione$, so it drops out of the monomial.  The least solution is the total weight $\sem{X}$ defined above.
+* **Weighted languages, $\mathbb{S} = \Series$.**  Here $\Series$ is the semiring of *weighted languages* (formal power series), i.e., functions $L : \Sigma^* \to \Values$, with $\oplus$ taken pointwise and $\otimes$ given by concatenation, $(L \otimes L')(s) = \bigoplus_{s = u\,v} L(u) \otimes L'(v)$.  A rule weight $w$ becomes the series that gives the empty string weight $w$, and a terminal $a$ becomes the series that gives the one-symbol string $a$ weight $\semione$.  The least solution $L_X$ assigns each string $s$ the total weight of the derivations of $X$ that yield $s$.
 
-Going from grammars to algebraic systems forgets nothing important: each rule becomes a monomial and each nonterminal a variable, and in the other direction, each monomial of a polynomial becomes a rule.  Over the semiring of formal languages, the least solution of the system is exactly the language generated by the grammar, which is the observation of Chomsky and Schützenberger.  Over other semirings, the least solution is the total value of all derivations.
+| grammar | system over $\Values$ (weights only) | system over $\Series$ (weighted languages) |
+|:--------|:-------------------------------------|:-------------------------------------------|
+| nonterminal $X$ | variable $X$ | variable $X$ |
+| terminal $a$ | $\semione$ (drops out) | the series $a$ (string $a$ with weight $\semione$) |
+| rule $X \xrightarrow{w} Y_1 \cdots Y_K$ | monomial $w \otimes \mathop{\bigcirc}_{Y_k \in \mathcal{N}} Y_k$ in $f_X$ | monomial $w\, Y_1 \cdots Y_K$ in $f_X$, in order |
+| derivation $\deriv$ with yield $s$ | the term $w(\deriv)$ | the term $w(\deriv)\, s$ |
+| least solution, $X$ component | $\sem{X} \in \Values$ | $L_X \in \Series$ |
+
+The two are related by forgetting the strings: $\sem{X} = \bigoplus_{s \in \Sigma^*} L_X(s)$, i.e., the image of $L_X$ under the homomorphism that sends every terminal to $\semione$.  When $\Values$ is the boolean semiring, a weighted language is just a formal language, $L_X$ is the language generated by $X$, and the least-solution characterization is the observation of Chomsky and Schützenberger.
+
+This distinction matters for the algorithms below.  Even when $\Values$ is commutative, $\Series$ is *not* (concatenation does not commute: $a\,b \ne b\,a$).  The algorithms in this post assume a commutative semiring, so they solve the weights-only system for $\sem{\cdot}$; they do not compute the weighted language $L_X$ (we will see a non-commutative example that the right-linear solver cannot handle).
 
 The fixpoint equations are *underspecified*: they provide necessary, but not sufficient, conditions for a solution to equal the potentially infinite sum over derivations.
 
@@ -258,13 +264,13 @@ $$
 \begin{aligned} X &\xrightarrow{1} b \\ X &\xrightarrow{1} X\,A \\ A &\xrightarrow{0.5} a \end{aligned}
 $$
 
-However, if we unfold the $A$ subgoal in the second rule and exploit the commutativity of multiplication (if permitted by the grammar's semiring) to reorder the right-hand side, then we arrive at the right-linear grammar from before.  Unfortunately, not all semirings are commutative; thus, permuting the right-hand side is not allowed.  The following example, using the semiring of formal languages, is linear but not right-linear.<footnote>The solution to this grammar is $\sem{S} = \{ a^n b^n \mid n \in \mathbb{N} \}$, which is not a regular language.  Thus, it cannot be expressed as a (finite) expression involving the operations $\otimes$, $\oplus$, and $\kleene{(\cdot)}$.</footnote>
+However, if we unfold the $A$ subgoal in the second rule and exploit the commutativity of multiplication (if permitted by the grammar's semiring) to reorder the right-hand side, then we arrive at the right-linear grammar from before.  (In the weights-only system, the terminal $a$ contributes $\semione$, so moving it is harmless.)  Unfortunately, not all semirings are commutative; thus, permuting the right-hand side is not allowed.  In particular, the weighted-language semiring $\Series$ is never commutative.  The following example, solved for its language (i.e., in $\Series$ with boolean weights, the semiring of formal languages), is linear but not right-linear.<footnote>The solution to this grammar is the language $L_S = \{ a^n b^n \mid n \in \mathbb{N} \}$, which is not a regular language.  Thus, it cannot be expressed as a (finite) expression involving the operations $\otimes$, $\oplus$, and $\kleene{(\cdot)}$.</footnote>
 
 $$
 \begin{aligned} S &\xrightarrow{\semione} a\,S\,b \\ S &\xrightarrow{\semione} \varepsilon \end{aligned}
 $$
 
-Unlike the previous example, we cannot transform this grammar into a right-linear grammar because its semiring is not commutative.  Unfortunately, the right-linear algorithm cannot solve this grammar efficiently; we would need a general linear algorithm.
+Unlike the previous example, we cannot transform this grammar into a right-linear grammar because its semiring is not commutative.  (Its weights-only system, $S = S \oplus \semione$, is easy; it is the language that is hard.)  Unfortunately, the right-linear algorithm cannot solve this grammar efficiently; we would need a general linear algorithm.
 
 </details>
 

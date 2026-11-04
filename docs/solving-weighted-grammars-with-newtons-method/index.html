@@ -37,7 +37,7 @@
         inlineMath: [['$', '$']],
         displayMath: [['$$', '$$']],
         processEscapes: true,
-        macros: {"BestSolve": "{\\color{#332288}{\\mathsf{best\\_solve}}}", "Change": "{\\color{#CC6677}{\\mathfrak{d}}}", "Chart": "{\\color{#4617ac}{\\mathfrak{m}}}", "Comment": "\\color{grey}{\\triangleright}\\ \\color{grey}", "Dim": ["\\DimName(#1)", 1], "DimName": "{\\color{#332288}{\\mathsf{dim}}}", "HeightName": "{\\color{#332288}{\\mathsf{height}}}", "KleeneStar": "{\\color{#332288}{\\star}}", "NewGrammar": "\\{\\,\\}", "Newton": "{\\color{#332288}{\\mathsf{newton}}}", "NewtonInit": "{\\color{#332288}{\\mathsf{newton\\_init}}}", "NewtonStep": "{\\color{#332288}{\\mathsf{newton\\_step}}}", "NextChange": "{\\color{#b53389}{\\mathfrak{d}\u0027}}", "NextChart": "{\\color{#882255}{\\mathfrak{m}\u0027}}", "Notation": "\\color{#332288}", "SccName": "{\\color{#332288}{\\mathsf{scc}}}", "SolveLinearName": "{\\color{#332288}{\\mathsf{solve\\_linear}}}", "SolveName": "{\\color{#332288}{\\mathsf{solve}}}", "Values": "{\\color{magenta}{\\mathbb{V}}}", "cPP": "\\color{#b53389}", "dEQ": "{\\color{#CC6677}{=\\!d}}", "dLE": "{\\color{#882255}{\\le\\!d}}", "dLT": "{\\color{#4617ac}{\\lt\\!d}}", "dPP": "{\\color{#b53389}{=\\!d\\!+\\!1}}", "dbigotimes": "\\mathop{\\color[rgb]{0,0,.5}{\\bigcirc}}", "deriv": "\\boldsymbol{\\delta}", "doplus": "\\mathbin{\\color[rgb]{0,0,.5}{\\oplus}}", "dopluseq": "\\mathrel{\\color[rgb]{0,0,.5}{\\oplus\\mkern-2mu\\texttt{=}}}", "dotimes": "\\mathbin{\\color[rgb]{0,0,.5}{\\circ}}", "dotimesdots": "\\dotimes{\\color[rgb]{0,0,.5}{\\cdots}}\\dotimes", "kleene": ["#1^{\\KleeneStar}", 1], "llbracket": "[\\![", "otimes": "\\mathbin{\\circ}", "rrbracket": "]\\!]", "sem": ["{\\color{magenta}{\\llbracket}}#1{\\color{magenta}{\\rrbracket}}", 1], "semione": "{\\color{magenta}{\\underline{1}}}", "semizero": "{\\color{magenta}{\\underline{0}}}", "solveLinear": ["\\SolveLinearName(#1)", 1]},
+        macros: {"BestSolve": "{\\color{#332288}{\\mathsf{best\\_solve}}}", "Change": "{\\color{#CC6677}{\\mathfrak{d}}}", "Chart": "{\\color{#4617ac}{\\mathfrak{m}}}", "Comment": "\\color{grey}{\\triangleright}\\ \\color{grey}", "Dim": ["\\DimName(#1)", 1], "DimName": "{\\color{#332288}{\\mathsf{dim}}}", "HeightName": "{\\color{#332288}{\\mathsf{height}}}", "KleeneStar": "{\\color{#332288}{\\star}}", "NewGrammar": "\\{\\,\\}", "Newton": "{\\color{#332288}{\\mathsf{newton}}}", "NewtonInit": "{\\color{#332288}{\\mathsf{newton\\_init}}}", "NewtonStep": "{\\color{#332288}{\\mathsf{newton\\_step}}}", "NextChange": "{\\color{#b53389}{\\mathfrak{d}\u0027}}", "NextChart": "{\\color{#882255}{\\mathfrak{m}\u0027}}", "Notation": "\\color{#332288}", "SccName": "{\\color{#332288}{\\mathsf{scc}}}", "Series": "\\Values\\langle\\!\\langle \\Sigma^* \\rangle\\!\\rangle", "SolveLinearName": "{\\color{#332288}{\\mathsf{solve\\_linear}}}", "SolveName": "{\\color{#332288}{\\mathsf{solve}}}", "Values": "{\\color{magenta}{\\mathbb{V}}}", "cPP": "\\color{#b53389}", "dEQ": "{\\color{#CC6677}{=\\!d}}", "dLE": "{\\color{#882255}{\\le\\!d}}", "dLT": "{\\color{#4617ac}{\\lt\\!d}}", "dPP": "{\\color{#b53389}{=\\!d\\!+\\!1}}", "dbigotimes": "\\mathop{\\color[rgb]{0,0,.5}{\\bigcirc}}", "deriv": "\\boldsymbol{\\delta}", "doplus": "\\mathbin{\\color[rgb]{0,0,.5}{\\oplus}}", "dopluseq": "\\mathrel{\\color[rgb]{0,0,.5}{\\oplus\\mkern-2mu\\texttt{=}}}", "dotimes": "\\mathbin{\\color[rgb]{0,0,.5}{\\circ}}", "dotimesdots": "\\dotimes{\\color[rgb]{0,0,.5}{\\cdots}}\\dotimes", "kleene": ["#1^{\\KleeneStar}", 1], "llbracket": "[\\![", "otimes": "\\mathbin{\\circ}", "rrbracket": "]\\!]", "sem": ["{\\color{magenta}{\\llbracket}}#1{\\color{magenta}{\\rrbracket}}", 1], "semione": "{\\color{magenta}{\\underline{1}}}", "semizero": "{\\color{magenta}{\\underline{0}}}", "solveLinear": ["\\SolveLinearName(#1)", 1]},
       },
       chtml: {
         scale: 1,
@@ -100,7 +100,7 @@
 </ul>
 <p>Proofs, side examples, and background are tucked into collapsible blocks (▸) for readers who want more depth.</p>
 </div>
-<p>A weighted context-free grammar $\mathcal{G}$ is a set of rules $X \xrightarrow{w} Y_1 \cdots Y_K$, each of which rewrites a nonterminal $X$ into a sequence of symbols $Y_1 \cdots Y_K$ with a weight $w \in \Values$.  It assigns a semiring value $\sem{X} \in \Values$ to each nonterminal $X$: the total weight of all derivations $\deriv$ rooted at $X$,</p>
+<p>A weighted context-free grammar $\mathcal{G}$ over a semiring $\Values$ has nonterminals $\mathcal{N}$, terminals $\Sigma$, and a set of rules $X \xrightarrow{w} Y_1 \cdots Y_K$, each of which rewrites a nonterminal $X \in \mathcal{N}$ into a sequence of symbols $Y_1 \cdots Y_K \in (\mathcal{N} \cup \Sigma)^*$ with a weight $w \in \Values$.  The grammar assigns a value $\sem{X} \in \Values$ to each nonterminal $X$: the total weight of all derivations $\deriv$ rooted at $X$,</p>
 <p>$$
 \sem{X} = \bigoplus_{\deriv \in \mathcal{D}(X)} w(\deriv),
 $$</p>
@@ -108,44 +108,55 @@ $$</p>
 <p>$$
 \sem{X} = \bigoplus_{(X \xrightarrow{w} Y_1 \cdots Y_K) \in \mathcal{G}} w \otimes \sem{Y_1} \otimes \cdots \otimes \sem{Y_K},
 $$</p>
-<p>with $\sem{a} = \semione$ for each terminal $a$.</p>
+<p>with $\sem{a} = \semione$ for each terminal $a \in \Sigma$.  Note that $\sem{X}$ ignores <em>which strings</em> the derivations yield: it sums the weights of all derivations, whatever their yield.  This total weight (sometimes called the treesum or, for a PCFG, the partition function) is the quantity the algorithms below compute.</p>
 <h2 id="grammars-are-algebraic-systems">Grammars are algebraic systems</h2>
-<p>The fixpoint equations of a grammar are an instance of a classical object: an <strong>algebraic system</strong> of equations over a semiring (Chomsky and Schützenberger, 1963; <a href="https://doi.org/10.1007/978-3-540-73208-2_17">Esparza et al., 2007</a>; <a href="https://mediatum.ub.tum.de/doc/1273784/1273784.pdf">Schlund, 2016</a>).  Fix a set of variables $\mathcal{X} = \{X_1, \ldots, X_n\}$.  A <em>monomial</em> is a finite product of semiring constants and variables, such as $a \otimes X_1 \otimes X_2$; a <em>polynomial</em> is a finite sum of monomials; and an algebraic system is a system of equations</p>
+<p>The fixpoint equations of a grammar are an instance of a classical object: an <strong>algebraic system</strong> of equations over a semiring (Chomsky and Schützenberger, 1963; <a href="https://doi.org/10.1007/978-3-540-73208-2_17">Esparza et al., 2007</a>; <a href="https://mediatum.ub.tum.de/doc/1273784/1273784.pdf">Schlund, 2016</a>).  Fix a semiring $\mathbb{S}$ and a set of variables $\mathcal{X} = \{X_1, \ldots, X_n\}$.  A <em>monomial</em> is a finite product of constants from $\mathbb{S}$ and variables, such as $c \otimes X_1 \otimes X_2$; a <em>polynomial</em> is a finite sum of monomials; and an algebraic system is a system of equations</p>
 <p>$$
 \boldsymbol{X} = \boldsymbol{f}(\boldsymbol{X}),
 $$</p>
-<p>where each component $f_X$ is a polynomial.  The grammar problem and the algebraic problem are essentially the same problem:</p>
+<p>where each component $f_X$ is a polynomial.  The grammar problem and the algebraic problem are essentially the same problem, but we have to be careful about <em>which</em> semiring $\mathbb{S}$ the system lives in, because there are two natural choices.  They differ in what happens to the terminals:</p>
+<ul>
+<li><strong>Weights only, $\mathbb{S} = \Values$.</strong>  Each terminal is replaced by $\semione$, so it drops out of the monomial.  The least solution is the total weight $\sem{X}$ defined above.</li>
+<li><strong>Weighted languages, $\mathbb{S} = \Series$.</strong>  Here $\Series$ is the semiring of <em>weighted languages</em> (formal power series), i.e., functions $L : \Sigma^* \to \Values$, with $\oplus$ taken pointwise and $\otimes$ given by concatenation, $(L \otimes L')(s) = \bigoplus_{s = u\,v} L(u) \otimes L'(v)$.  A rule weight $w$ becomes the series that gives the empty string weight $w$, and a terminal $a$ becomes the series that gives the one-symbol string $a$ weight $\semione$.  The least solution $L_X$ assigns each string $s$ the total weight of the derivations of $X$ that yield $s$.</li>
+</ul>
 <table>
 <thead>
 <tr>
 <th style="text-align: left;">grammar</th>
-<th style="text-align: left;">algebraic system</th>
+<th style="text-align: left;">system over $\Values$ (weights only)</th>
+<th style="text-align: left;">system over $\Series$ (weighted languages)</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td style="text-align: left;">nonterminal $X$</td>
 <td style="text-align: left;">variable $X$</td>
-</tr>
-<tr>
-<td style="text-align: left;">rule $X \xrightarrow{w} Y_1 \cdots Y_K$</td>
-<td style="text-align: left;">monomial $w \otimes Y_1 \otimes \cdots \otimes Y_K$ in $f_X$</td>
+<td style="text-align: left;">variable $X$</td>
 </tr>
 <tr>
 <td style="text-align: left;">terminal $a$</td>
-<td style="text-align: left;">constant (its weight; the symbol $a$ itself in the semiring of formal languages)</td>
+<td style="text-align: left;">$\semione$ (drops out)</td>
+<td style="text-align: left;">the series $a$ (string $a$ with weight $\semione$)</td>
 </tr>
 <tr>
-<td style="text-align: left;">derivation (parse tree) $\deriv$</td>
-<td style="text-align: left;">a term $w(\deriv)$ in the expansion of the solution</td>
+<td style="text-align: left;">rule $X \xrightarrow{w} Y_1 \cdots Y_K$</td>
+<td style="text-align: left;">monomial $w \otimes \mathop{\bigcirc}_{Y_k \in \mathcal{N}} Y_k$ in $f_X$</td>
+<td style="text-align: left;">monomial $w\, Y_1 \cdots Y_K$ in $f_X$, in order</td>
 </tr>
 <tr>
-<td style="text-align: left;">total weight $\sem{X}$ of all derivations of $X$</td>
-<td style="text-align: left;">the $X$ component of the least solution</td>
+<td style="text-align: left;">derivation $\deriv$ with yield $s$</td>
+<td style="text-align: left;">the term $w(\deriv)$</td>
+<td style="text-align: left;">the term $w(\deriv)\, s$</td>
+</tr>
+<tr>
+<td style="text-align: left;">least solution, $X$ component</td>
+<td style="text-align: left;">$\sem{X} \in \Values$</td>
+<td style="text-align: left;">$L_X \in \Series$</td>
 </tr>
 </tbody>
 </table>
-<p>Going from grammars to algebraic systems forgets nothing important: each rule becomes a monomial and each nonterminal a variable, and in the other direction, each monomial of a polynomial becomes a rule.  Over the semiring of formal languages, the least solution of the system is exactly the language generated by the grammar, which is the observation of Chomsky and Schützenberger.  Over other semirings, the least solution is the total value of all derivations.</p>
+<p>The two are related by forgetting the strings: $\sem{X} = \bigoplus_{s \in \Sigma^*} L_X(s)$, i.e., the image of $L_X$ under the homomorphism that sends every terminal to $\semione$.  When $\Values$ is the boolean semiring, a weighted language is just a formal language, $L_X$ is the language generated by $X$, and the least-solution characterization is the observation of Chomsky and Schützenberger.</p>
+<p>This distinction matters for the algorithms below.  Even when $\Values$ is commutative, $\Series$ is <em>not</em> (concatenation does not commute: $a\,b \ne b\,a$).  The algorithms in this post assume a commutative semiring, so they solve the weights-only system for $\sem{\cdot}$; they do not compute the weighted language $L_X$ (we will see a non-commutative example that the right-linear solver cannot handle).</p>
 <p>The fixpoint equations are <em>underspecified</em>: they provide necessary, but not sufficient, conditions for a solution to equal the potentially infinite sum over derivations.</p>
 <details class="derivation">
 <summary>Example: a grammar whose equations have two solutions
@@ -270,11 +281,11 @@ $$</p>
 <p>$$
 \begin{aligned} X &\xrightarrow{1} b \\ X &\xrightarrow{1} X\,A \\ A &\xrightarrow{0.5} a \end{aligned}
 $$</p>
-<p>However, if we unfold the $A$ subgoal in the second rule and exploit the commutativity of multiplication (if permitted by the grammar's semiring) to reorder the right-hand side, then we arrive at the right-linear grammar from before.  Unfortunately, not all semirings are commutative; thus, permuting the right-hand side is not allowed.  The following example, using the semiring of formal languages, is linear but not right-linear.<label class="sidenote-number"></label><span class="margin-note">The solution to this grammar is $\sem{S} = \{ a^n b^n \mid n \in \mathbb{N} \}$, which is not a regular language.  Thus, it cannot be expressed as a (finite) expression involving the operations $\otimes$, $\oplus$, and $\kleene{(\cdot)}$.</span></p>
+<p>However, if we unfold the $A$ subgoal in the second rule and exploit the commutativity of multiplication (if permitted by the grammar's semiring) to reorder the right-hand side, then we arrive at the right-linear grammar from before.  (In the weights-only system, the terminal $a$ contributes $\semione$, so moving it is harmless.)  Unfortunately, not all semirings are commutative; thus, permuting the right-hand side is not allowed.  In particular, the weighted-language semiring $\Series$ is never commutative.  The following example, solved for its language (i.e., in $\Series$ with boolean weights, the semiring of formal languages), is linear but not right-linear.<label class="sidenote-number"></label><span class="margin-note">The solution to this grammar is the language $L_S = \{ a^n b^n \mid n \in \mathbb{N} \}$, which is not a regular language.  Thus, it cannot be expressed as a (finite) expression involving the operations $\otimes$, $\oplus$, and $\kleene{(\cdot)}$.</span></p>
 <p>$$
 \begin{aligned} S &\xrightarrow{\semione} a\,S\,b \\ S &\xrightarrow{\semione} \varepsilon \end{aligned}
 $$</p>
-<p>Unlike the previous example, we cannot transform this grammar into a right-linear grammar because its semiring is not commutative.  Unfortunately, the right-linear algorithm cannot solve this grammar efficiently; we would need a general linear algorithm.</p>
+<p>Unlike the previous example, we cannot transform this grammar into a right-linear grammar because its semiring is not commutative.  (Its weights-only system, $S = S \oplus \semione$, is easy; it is the language that is hard.)  Unfortunately, the right-linear algorithm cannot solve this grammar efficiently; we would need a general linear algorithm.</p>
 </details>
 <p>Algorithm 2 leverages a general-purpose algorithm for solving right-linear recurrences, i.e., equations of the form $\boldsymbol{x} = \boldsymbol{b} \oplus \boldsymbol{A}\, \boldsymbol{x}$ where $\boldsymbol{A} \in \Values^{N \times N}$, $\boldsymbol{b} \in \Values^{N}$.  The solution is found by the matrix star operation $\boldsymbol{x} = \kleene{\boldsymbol{A}}\, \boldsymbol{b}$.</p>
 <details class="derivation">
