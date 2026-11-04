@@ -1,4 +1,4 @@
-title: Newton's Method for Weighted Grammars
+title: Solving Weighted Grammars with Newton's Method
 date: 2026-11-04
 tags: semirings, grammars, parsing, algorithms, dynamic-programming
 status: draft
@@ -16,6 +16,9 @@ status: draft
 \newcommand{\Newton}{{\color{#332288}{\mathsf{newton}}}}
 \newcommand{\NewtonStep}{{\color{#332288}{\mathsf{newton\_step}}}}
 \newcommand{\NewtonInit}{{\color{#332288}{\mathsf{newton\_init}}}}
+\newcommand{\SolveName}{{\color{#332288}{\mathsf{solve}}}}
+\newcommand{\BestSolve}{{\color{#332288}{\mathsf{best\_solve}}}}
+\newcommand{\SccName}{{\color{#332288}{\mathsf{scc}}}}
 \newcommand{\SolveLinearName}{{\color{#332288}{\mathsf{solve\_linear}}}}
 \newcommand{\solveLinear}[1]{\SolveLinearName(#1)}
 \newcommand{\semione}{{\color{magenta}{\underline{1}}}}
@@ -30,6 +33,7 @@ status: draft
 \newcommand{\dotimes}{\mathbin{\color[rgb]{0,0,.5}{\circ}}}
 \newcommand{\doplus}{\mathbin{\color[rgb]{0,0,.5}{\oplus}}}
 \newcommand{\dopluseq}{\mathrel{\color[rgb]{0,0,.5}{\oplus\mkern-2mu\texttt{=}}}}
+\newcommand{\dbigotimes}{\mathop{\color[rgb]{0,0,.5}{\bigcirc}}}
 \newcommand{\dotimesdots}{\dotimes{\color[rgb]{0,0,.5}{\cdots}}\dotimes}
 \newcommand{\NewGrammar}{\{\,\}}
 \newcommand{\dLT}{{\color{#4617ac}{\lt\!d}}}
@@ -105,7 +109,7 @@ The sum over derivations is the *least* solution.  In $\omega$-continuous semiri
 
 *Proof (sketch).* We start with every nonterminal at $\semizero$.  From there, we build height $\le 1$ derivations from the rules whose right-hand sides contain only terminals.  From there, each application of the update combines the values of height $\le t$ derivations by applying the rules of the grammar to derive the values of all height $\le t\!+\!1$ derivations.<footnote>This is a form of dynamic programming: the estimate at time $t$ is a memo table for a version of the computation, which makes the height $t$ an argument to break cycles.</footnote> $\square$
 
-Assuming the sum is convergent, fixpoint iteration will diligently compute it (up to each height) until every height has been covered; thus, it converges in the limit to $\sem{\cdot}$.  This post describes an accelerated fixpoint iteration variant based on Newton's method for solving equations.  It is adapted from chapter 5 of [my dissertation](https://timvieira.github.io/doc/2023-timv-dissertation.pdf), specialized here from Dyna programs to grammars; the [code](https://github.com/timvieira/semiring-newton) works for any commutative semiring.
+Assuming the sum is convergent, fixpoint iteration will diligently compute it (up to each height) until every height has been covered; thus, it converges in the limit to $\sem{\cdot}$.  This post describes several algorithms for solving a weighted grammar's algebraic system, each of which works best under different conditions: an accelerated fixpoint iteration variant based on Newton's method for solving equations, a specialized solver for grammars with a certain linear structure, and a hybrid algorithm that breaks up a large grammar into smaller subgrammars that can be solved separately with the best applicable method.  It is adapted from chapter 5 of [my dissertation](https://timvieira.github.io/doc/2023-timv-dissertation.pdf), specialized here from Dyna programs to grammars; the [code](https://github.com/timvieira/semiring-newton) works for any commutative semiring.
 
 <img src="../images/newton-convergence.png" class="right" alt="Portrait of Isaac Newton" style="width: 160px;">
 
@@ -147,6 +151,11 @@ Please refer to the figure below for an illustration.<footnote>This is a variant
 
 The dimension of a derivation is always $\le$ its height, but it is often $\ll$.  The set of derivations with dimension $d$ can be infinite.  In contrast, the set of derivations with fixed height is finite.  For example, each derivation in the geometric series grammar (`0.5: S → S a`, `1: S → b`) has dimension $0$.  What is remarkable about the set of derivations with dimension $\dPP$ is that there is an efficient *linear* structure relating it to the sets of derivations with dimensions $\dLE$, $\dEQ$, and $\dLT$.  This allows us to grow the set of derivations we have summed over much more quickly using a specialized linear solver (below).
 
+<figure>
+<img src="../images/height-dimension.svg" alt="Two derivations under the grammar S → S S, S → a, with each node labeled by its height and dimension. Left: a right-branching caterpillar of height 5 and dimension 1. Right: a balanced tree of height 3 and dimension 2." style="width:100%">
+<figcaption style="text-align: center; font-style: italic; font-size: 0.9em; margin: 0.4em 0 1.2em;">Height and dimension of two derivations under <code>S → S S</code>, <code>S → a</code>.  Fixpoint iteration sums the left derivation on iteration 5; Newton's method sums it on iteration 1 (the iteration equal to its dimension, counting the initialization as iteration 0).</figcaption>
+</figure>
+
 <div class="pseudocode" markdown="1">
 **Algorithm 1** $\Newton$: Solve grammar $\mathcal{G}$ by Newton's method
 
@@ -186,7 +195,7 @@ We provide pseudocode for $\Newton$ in Algorithm 1.<footnote>Our pseudocode foll
 
 We discuss solving the linear subproblems below.  Unfortunately, not all subproblems $\NextChange$ can be solved exactly *and* efficiently for all semirings; important tractable special cases include commutative semirings and cases where the subproblems are either left linear or right linear.  Other cases are discussed in the literature (e.g., [Esparza et al., 2007](https://doi.org/10.1007/978-3-540-73208-2_17); [Schlund, 2016](https://mediatum.ub.tum.de/doc/1273784/1273784.pdf); [Reps et al., 2017](https://doi.org/10.1145/3024084)).  We note that fixpoint iteration methods are always available for (approximately) solving $\NextChange$; however, fixpoint iteration may not converge quickly (or at all).
 
-As noted in other work on Newton's method (e.g., [Schlund, 2016](https://mediatum.ub.tum.de/doc/1273784/1273784.pdf)), decomposing the grammar into strongly connected components can speed the algorithm up considerably.  (The implementation below does not do this yet.)
+As noted in other work on Newton's method (e.g., [Schlund, 2016](https://mediatum.ub.tum.de/doc/1273784/1273784.pdf)), decomposing the grammar into strongly connected components can speed the algorithm up considerably.  Our hybrid algorithm (below) speeds up Newton's method in this way.
 
 We argue for the correctness of $\Newton$ in the following proposition.
 
@@ -286,6 +295,43 @@ $$
 The matrix star runs in $\mathcal{O}(|N|^3)$ time and can be made to run in $\mathcal{O}(|N|^2)$ space.<footnote>Sub-cubic algorithms exist when $\Values$ is a *ring*, e.g., [Strassen (1969)](https://doi.org/10.1007/BF02165411).</footnote>  The runtime can be improved by decomposition into strongly connected components.<footnote>The SCC-based algorithms for transitive closure date back to [Purdom (1970)](https://doi.org/10.1007/BF01940892).</footnote>  Note that there is a speed–accuracy tradeoff when using the right-linear solver.  Often fixpoint iteration can reach a tolerable level of accuracy faster than the exact algorithm.<footnote>The convergence rate of fixpoint iteration depends on the properties of the $\boldsymbol{A}$ matrix.  In the case of the real semiring, we can bound the number of iterations to reach a given error tolerance in terms of the spectral radius of $\boldsymbol{A}$.</footnote>
 
 
+## Hybrid algorithm
+
+This post has provided several algorithms that each work best under different conditions.  This section provides a hybrid algorithm that tries to use the best algorithms available to solve a given grammar $\mathcal{G}$.  If $\mathcal{G}$ is acyclic, it can be solved efficiently in a single bottom-up pass.  However, if $\mathcal{G}$ is cyclical, it is best to solve $\mathcal{G}$ by breaking it up into cyclical subgrammars $\mathcal{G}^{(1)}, \ldots, \mathcal{G}^{(M)}$ by strongly connected component (SCC) decomposition of its dependency graph (an edge $X \to Y$ for each nonterminal $Y$ on the right-hand side of a rule for $X$).<footnote>SCC decomposition is a common optimization for solving cyclical equations (e.g., [Goodman, 1998](https://arxiv.org/abs/cmp-lg/9805007); [Nederhof and Satta, 2008](https://doi.org/10.1007/s11168-008-9052-8); [Esparza et al., 2007](https://doi.org/10.1007/978-3-540-73208-2_17); [Schlund et al., 2013](https://doi.org/10.1007/978-3-642-45221-5_48); [Mohri, 2002](https://cs.nyu.edu/~mohri/pub/jalc.pdf); [Eisner, 2023](http://cs.jhu.edu/~jason/papers/#eisner-2023-tacl); [Baharev et al., 2016](https://baharev.info/publications/baharev_tearing_survey.pdf); [Chiang et al., 2023](https://arxiv.org/abs/2210.01206); [Purdom, 1970](https://doi.org/10.1007/BF01940892)).</footnote>  This decomposition allows each subgrammar to be solved separately, provided that the solutions to the subgrammars it depends on have been computed beforehand; this can be achieved by solving the subgrammars in a topological order.  By analyzing the structure of $\mathcal{G}^{(m)}$, we can determine what the best method for solving it is likely to be.  Below is our ranking:
+
+1. $\SolveLinearName$: Because it is exact.  However, it requires a closed semiring and at least one of $\{$right-linearity, left-linearity, linearity+commutativity$\}$.
+2. $\Newton$: Because it converges more quickly than fixpoint iteration methods.  However, it requires that the induced linear subproblems can be solved efficiently.
+3. Fixpoint iteration: When all else fails, the subgrammar can be solved with fixpoint iteration (e.g., the agenda-based semi-naive algorithm), as it runs under the most general conditions.
+
+Algorithm 3 provides pseudocode for our hybrid algorithm, which solves each subgrammar in a topological order where the solutions to earlier subgrammars are taken as inputs to later subgrammars.  It makes use of a subroutine $\BestSolve$ that uses the ranking of solvers above to select the best strategy for solving the given subgrammar.<footnote>A simple implementation of $\BestSolve$ would use exception handling to move down the list of preferred solvers.  This can be sped up when the necessary properties can be checked ahead of any expensive computations.  For example, linearity can be checked by looking at the rules.</footnote>  Note that a rule may become linear once the components it depends on are solved: in the grammar of the code example below, `VP → VP PP` is linear in $\mathrm{VP}$ once $\mathrm{PP}$ is known, so $\mathrm{VP}$'s component is solved exactly by $\SolveLinearName$ even though the grammar as a whole is not linear.
+
+<div class="pseudocode" markdown="1">
+**Algorithm 3** $\SolveName$: Solve grammar $\mathcal{G}$ using the hybrid algorithm
+
+$$
+\begin{aligned}
+&\textbf{def } \SolveName(\mathcal{G}): \\
+&\quad \Chart \gets \NewGrammar \\
+&\quad \textbf{for } \sigma \in \SccName(\mathcal{G}): \quad \Comment{\text{Topologically ordered list of SCCs}} \\
+&\quad\quad \Comment{\text{Restrict } \mathcal{G} \text{ to the nonterminals in the current component, } \sigma} \\
+&\quad\quad \mathcal{G}' \gets \NewGrammar \\
+&\quad\quad \textbf{for } (X \to Y_1 \cdots Y_K) \in \mathcal{G} \text{ with weight } w \textbf{ where } X \in \sigma: \\
+&\quad\quad\quad \Comment{\text{Fold symbols outside } \sigma \text{ (already solved) into the weight}} \\
+&\quad\quad\quad \mathcal{G}'[X] \dopluseq \big(w \dotimes \dbigotimes_{Y_k \notin \sigma} \Chart[Y_k]\big) \dotimes \dbigotimes_{Y_k \in \sigma} Y_k \\
+&\quad\quad \Comment{\text{Solve the subgrammar with the best applicable method}} \\
+&\quad\quad \Chart \gets \Chart \oplus \BestSolve(\mathcal{G}') \\
+&\quad \textbf{return } \Chart
+\end{aligned}
+$$
+</div>
+
+**Discussion.**
+
+* When solving an SCC with either $\Newton$ or a fixpoint algorithm, it may be necessary to use a numerical convergence threshold (or iteration limit).  Otherwise, Algorithm 3 could run forever on a single subgrammar without making progress on the others.
+* Folding the solved symbols into the rule weights reorders products, so it assumes a commutative semiring, as does the rest of the code.
+* It is often best to *optimize* the grammar before solving it, e.g., by grammar transformations that produce a smaller, equivalent grammar that is more efficient to solve.
+
+
 ## Code
 
 The [implementation](https://github.com/timvieira/semiring-newton/blob/main/newton/newton.py) takes a grammar from the [`leftcorner`](https://github.com/rycolab/left-corner) package, which provides a WCFG class, several semirings, and Lehmann's algorithm (`cfg._lehmann`).  The main loop mirrors Algorithm 1:
@@ -375,6 +421,31 @@ cfg = CFG.from_string("""
 """, MaxTimes)
 
 newton(cfg)   # S: 0.252, NP: 0.6, VP: 0.42, PP: 0.6  (exact after one iteration)
+```
+
+The hybrid algorithm (Algorithm 3) is [`newton/hybrid.py`](https://github.com/timvieira/semiring-newton/blob/main/newton/hybrid.py).  On the same grammar, with a few extra rules for $\mathrm{V}$, it solves the components in topological order:
+
+```python
+from newton import solve
+
+cfg = CFG.from_string("""
+1.0: S → NP VP
+0.4: NP → NP PP
+0.6: NP → n
+0.7: VP → v NP
+0.3: VP → VP PP
+1.0: PP → p NP
+0.5: VP → V
+0.5: V → V v
+0.5: V → v
+""", Real)
+
+trace = []
+solve(cfg, trace=trace)
+# [({'NP', 'PP'}, 'newton'),      NP → NP PP: nonlinear
+#  ({'V'},  'solve_linear'),
+#  ({'VP'}, 'solve_linear'),      VP → VP PP: linear once PP is solved
+#  ({'S'},  'solve_linear')]      acyclic
 ```
 
 In commutative *idempotent* semirings like max-times, Newton's method reaches the exact solution after at most $|N|$ iterations ([Esparza, Kiefer, and Luttenberger, 2010](https://doi.org/10.1145/1857914.1857917)).

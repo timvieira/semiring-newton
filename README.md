@@ -6,6 +6,8 @@ Solve fixpoint systems of equations over commutative semirings.
 
 This package implements a solver based on Newton's method for solving fixpoint systems of equations, suitably generalized beyond real numbers to operate over semirings! The papers below are excellent examples of why Newton's method is awesome for solving the kinds of cyclical systems of equations that we encounter in probabilistic inference problems and other domains. Our implementation assumes that the semiring is commutative.
 
+`newton(cfg)` runs Newton's method; `solve(cfg)` is a hybrid solver that splits the grammar into strongly connected components and solves each one, in topological order, with the best applicable method (exact linear solver, then Newton, then fixpoint iteration).
+
 ### References
 
 * Details and discussion of semiring Newton's algorithm are in chapter 5 of [Tim Vieira's dissertation](https://timvieira.github.io/doc/2023-timv-dissertation.pdf)
