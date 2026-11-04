@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Graduate Descent</title>
+  <title>Newton's Method for Weighted Grammars &mdash; Graduate Descent</title>
   
 
   <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&display=swap"
@@ -37,7 +37,7 @@
         inlineMath: [['$', '$']],
         displayMath: [['$$', '$$']],
         processEscapes: true,
-        
+        macros: {"Change": "{\\color{#CC6677}{\\mathfrak{d}}}", "Chart": "{\\color{#4617ac}{\\mathfrak{m}}}", "Dim": ["\\mathrm{dim}(#1)", 1], "NextChange": "{\\color{#b53389}{\\mathfrak{d}\u0027}}", "NextChart": "{\\color{#882255}{\\mathfrak{m}\u0027}}", "semione": "\\mathbb{1}", "semizero": "\\mathbb{0}"},
       },
       chtml: {
         scale: 1,
@@ -61,167 +61,274 @@
 
 
 <div>
-  <article role="article">
+  <article class="hentry" role="article">
     <header>
-      <h1 class="entry-title">Articles</h1>
+      <h1 class="entry-title" style="view-transition-name: title-newtons-method-for-weighted-grammars">Newton's Method for Weighted Grammars</h1>
+      <p class="meta">
+        <time datetime="2026-11-04T00:00:00" pubdate>Nov 04, 2026</time>
+        <span class="byline author vcard">
+          by <span class="fn">Tim Vieira</span>
+        </span>
+        
+        <br>
+        <span class="tags">
+          <a class="tag" href="./index.html#tag=semirings">semirings</a> <a class="tag" href="./index.html#tag=grammars">grammars</a> <a class="tag" href="./index.html#tag=parsing">parsing</a> <a class="tag" href="./index.html#tag=algorithms">algorithms</a> <a class="tag" href="./index.html#tag=dynamic-programming">dynamic-programming</a>
+        </span>
+        
+      </p>
     </header>
+    <div class="entry-content" style="view-transition-name: article-body">
+      <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px 16px; margin-bottom: 1.5em; border-radius: 4px; font-size: 0.95em;">
+<p style="margin: 0;"><strong>Draft</strong> — This article is a work in progress. Content may change.
+</p></div>
 
-    <div id="blog-archives">
-      
+<p>A weighted context-free grammar (WCFG) assigns a semiring value to each nonterminal: the total weight $\beta(X)$ of all derivations rooted at $X$,</p>
+<p>$$
+\beta(X) = \bigoplus_{t \in \mathcal{D}(X)} w(t),
+$$</p>
+<p>where the weight $w(t)$ of a derivation $t$ is the $\otimes$-product of the weights of the rules it uses.  When the grammar is recursive, $\mathcal{D}(X)$ is infinite, and $\beta$ is the least solution to the system of fixpoint equations</p>
+<p>$$
+\beta(X) = \bigoplus_{(X \to Y_1 \cdots Y_K) \in \mathcal{R}} w(X \to Y_1 \cdots Y_K) \otimes \beta(Y_1) \otimes \cdots \otimes \beta(Y_K),
+$$</p>
+<p>with $\beta(a) = \semione$ for each terminal $a$.  Depending on the semiring, $\beta$ is the partition function of a PCFG (real semiring), the weight of the best derivation (max-times), whether $X$ derives anything at all (boolean), and so on.</p>
+<p>The standard approach is <strong>fixpoint iteration</strong>: start every nonterminal at $\semizero$ and apply the equations above as an update until nothing changes.  On iteration $t$, fixpoint iteration's estimate equals the total weight of all derivations of height $\le t$.<label class="sidenote-number"></label><span class="margin-note">We start with every nonterminal at $\semizero$.  From there, we build height $\le 1$ derivations from rules whose right-hand sides contain only terminals.  Each application of the update combines the values of height $\le t$ derivations by applying the rules of the grammar to derive the values of all height $\le t\!+\!1$ derivations.</span>  It converges in the limit, but it can be very slow.</p>
+<p><img src="./images/newton-convergence.png" class="right" alt="Portrait of Isaac Newton" style="width: 160px;"></p>
+<p>This post describes a much faster method: <strong>Newton's method, generalized to semirings</strong>.  The idea is due to <a href="https://doi.org/10.1007/978-3-540-73208-2_17">Esparza, Kiefer, and Luttenberger (2007)</a>; the presentation below is adapted from chapter 5 of <a href="https://timvieira.github.io/doc/2023-timv-dissertation.pdf">my dissertation</a>, specialized here from Dyna programs to grammars.  The <a href="https://github.com/timvieira/semiring-newton">code</a> works for any commutative semiring.</p>
+<h2 id="fixpoint-iteration-can-be-exponentially-slow">Fixpoint iteration can be exponentially slow</h2>
+<p>What is interesting about Newton's method relative to fixpoint iteration is that it can sum infinitely many derivations in a single iteration.  More specifically, each iteration sums the set of derivations by increasing <strong>dimension</strong> (defined below) rather than by height, as in fixpoint iteration.<label class="sidenote-number"></label><span class="margin-note">We use Newton's method to sum over semiring-weighted derivations; thus, our presentation will differ from that of <a href="https://doi.org/10.1007/978-3-540-73208-2_17">Esparza et al. (2007)</a>, which takes Newton's method as their starting point.  Newton's method for solving a fixpoint equation $\boldsymbol{x} = \boldsymbol{f}(\boldsymbol{x})$ <em>over the reals</em>, where $\boldsymbol{x} \in \mathbb{R}^D$ and $\boldsymbol{f}: \mathbb{R}^D \to \mathbb{R}^D$, is an iterative scheme with the update rule $\boldsymbol{x}^{(t+1)} \gets \boldsymbol{x}^{(t)} + (\boldsymbol{I}-\boldsymbol{J}^{(t)})^{-1} (\boldsymbol{f}(\boldsymbol{x}^{(t)}) - \boldsymbol{x}^{(t)})$, where $\boldsymbol{J}^{(t)}$ is the Jacobian matrix of $\boldsymbol{f}$ evaluated at $\boldsymbol{x}^{(t)}$.  Generalizing to the semiring setting requires retrofitting Newton's method to accommodate semirings that do not have subtraction, division, or differentiation.  For our purposes, such retrofitting would be a distraction; we refer the reader to <a href="https://doi.org/10.1007/978-3-540-73208-2_17">Esparza et al. (2007)</a>, <a href="https://doi.org/10.1145/3024084">Reps et al. (2017)</a>, and <a href="https://d-nb.info/100090086X/34">Luttenberger (2009)</a>, which discuss the connection.  We found the presentation in <a href="https://mediatum.ub.tum.de/doc/1273784/1273784.pdf">Schlund (2016)</a> the clearest.</span></p>
+<p><a href="https://doi.org/10.1145/1462153.1462154">Etessami and Yannakakis (2009)</a> showed that fixpoint iteration can converge exponentially slower than Newton's method.  Consider the following grammar, based on their Theorem 3.2:</p>
+<div class="highlight"><pre><span></span><code>0.5: S → S S
+0.5: S → a
+</code></pre></div>
+
+<p>Its fixpoint equation is $x = \frac{1}{2} + \frac{1}{2} x^2$, which has a single solution, $\beta(\mathrm{S}) = 1$.<label class="sidenote-number"></label><span class="margin-note">$\frac{1}{2} x^2 - x + \frac{1}{2} = 0$, which, by the quadratic formula with $a = \frac{1}{2}$, $b = -1$, $c = \frac{1}{2}$, has the solution set $\{1\}$.</span>  Fixpoint iteration requires roughly $2^k$ iterations to gain $k$ bits of precision, whereas Newton's method gains one bit of precision per iteration.  Here is what that looks like in practice, where the error is $1 - \text{estimate}$:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">method</th>
+<th style="text-align: right;">iterations</th>
+<th style="text-align: right;">error</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">fixpoint iteration</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">$1.4 \times 10^{-1}$</td>
+</tr>
+<tr>
+<td style="text-align: left;">fixpoint iteration</td>
+<td style="text-align: right;">1,000</td>
+<td style="text-align: right;">$2.0 \times 10^{-3}$</td>
+</tr>
+<tr>
+<td style="text-align: left;">fixpoint iteration</td>
+<td style="text-align: right;">100,000</td>
+<td style="text-align: right;">$2.0 \times 10^{-5}$</td>
+</tr>
+<tr>
+<td style="text-align: left;">Newton</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">$4.9 \times 10^{-4}$</td>
+</tr>
+<tr>
+<td style="text-align: left;">Newton</td>
+<td style="text-align: right;">39</td>
+<td style="text-align: right;">$9.1 \times 10^{-13}$</td>
+</tr>
+</tbody>
+</table>
+<p>Fixpoint iteration's error after $n$ iterations is about $2/n$; Newton's error after initialization plus $n$ iterations is exactly $2^{-(n+1)}$.  This grammar is a worst case for Newton's method (it is <em>critical</em>: the expected size of a tree is infinite).  On a subcritical grammar like <code>0.25: S → S S</code>, <code>0.75: S → a</code>, Newton's method converges <em>quadratically</em>: the errors on successive iterations are $0.25$, $0.025$, $3 \times 10^{-4}$, $5 \times 10^{-8}$, $10^{-15}$.</p>
+<h2 id="the-dimension-of-a-derivation">The dimension of a derivation</h2>
+<p><strong>Definition.</strong> The <strong>dimension</strong> $\Dim{t}$ of a derivation $t$ is defined inductively.  Suppose $t$ is rooted at a rule $X \to Y_1 \cdots Y_K$, and let $t_1, \ldots, t_m$ be the subderivations of the <em>nonterminal</em> children (terminal children are ignored).</p>
+<ul>
+<li>If $m = 0$: $\Dim{t} \overset{\text{def}}{=} 0$.</li>
+<li>If $m \ge 1$: let $d = \max(\Dim{t_1}, \ldots, \Dim{t_m})$.  If the argmax is unique (i.e., no ties for the max), $\Dim{t} \overset{\text{def}}{=} d$.  Otherwise, $\Dim{t} \overset{\text{def}}{=} d+1$.</li>
+</ul>
+<p>In words: a node's dimension goes up only where two children of maximal dimension meet; a chain of nodes with a single maximal child keeps the same dimension.<label class="sidenote-number"></label><span class="margin-note">This is a variant of the Horton–Strahler number of a tree.  See <a href="https://archive.model.in.tum.de/um/bibdb/esparza/lata2014.pdf">Esparza, Luttenberger, and Schlund (2014)</a> for a history of Strahler numbers and their connection to Newton's method.</span>  The figure below illustrates the definition.</p>
+<figure>
+<p><img src="./images/dimension.svg" alt="Three cases of the dimension of a derivation: a rule with no nonterminal children has dimension 0; a rule with two or more children of maximal dimension d has dimension d+1; a rule with a unique child of maximal dimension d has dimension d." style="width:100%"></p>
+</figure>
+
+<p>The dimension of a derivation is always $\le$ its height, but it is often $\ll$.  The set of derivations with dimension $d$ can be infinite.  In contrast, the set of derivations with fixed height is finite.  For example, every derivation of a linear grammar (at most one nonterminal per right-hand side), such as the geometric series <code>0.5: S → S a</code>, <code>1: S → b</code>, has dimension $0$.  What is remarkable about the set of derivations with dimension $= d\!+\!1$ is that there is an efficient <em>linear</em> structure relating it to the sets of derivations with dimensions $\le d$, $= d$, and $< d$.  This allows us to grow the set of derivations we have summed over much more quickly using a linear solver.</p>
+<h2 id="the-algorithm">The algorithm</h2>
+<p>Newton's method tracks two charts, much like semi-naive forward chaining: $\Chart$ holds the total weight of the dimension $< d$ derivations of each nonterminal, and $\Change$ holds the total weight of the dimension $= d$ derivations.  Their sum $\NextChart = \Chart \oplus \Change$ holds the dimension $\le d$ derivations.  To efficiently determine the values of all $= d\!+\!1$ derivations, Newton's method solves a <strong>linearized grammar</strong> for $\NextChange$:</p>
+<p><strong>Initialization.</strong>  $\Chart \gets \semizero$, and $\Change$ is the solution of the linear grammar made up of the rules with at most one nonterminal on the right-hand side.  These are exactly the dimension-$0$ derivations.</p>
+<p><strong>Iteration.</strong>  Given $\Chart$ (dimension $\lt d$) and $\Change$ (dimension $=d$), let $\NextChart = \Chart \oplus \Change$, and solve the following equations for $\NextChange$.  For each rule $X \to Y_1 \cdots Y_K$ with weight $w$:</p>
+<ul>
+<li>
+<p><em>Base case:</em> combine at least two derivations of dimension $=d$.  For each pair of positions $i < j$,
+$$
+\begin{aligned} \NextChange[X] \mathrel{\oplus}= w &\otimes \NextChart[Y_{\lt i}] \otimes \Change[Y_i] \\ &\otimes \Chart[Y_{i+1:j}] \otimes \Change[Y_j] \otimes \Chart[Y_{\gt j}] \end{aligned}
+$$
+Here $i$ and $j$ are the last two children of dimension $=d$, so every derivation is counted once.</p>
+</li>
+<li>
+<p><em>Recursive case:</em> derive $=d\!+\!1$ derivations by combining one $=d\!+\!1$ derivation with $\le d$ derivations.  For each position $k$ where $Y_k$ is a nonterminal,
+$$
+\NextChange[X] \mathrel{\oplus}= w \otimes \NextChart[Y_{\lt k}] \otimes \NextChange[Y_k] \otimes \NextChart[Y_{\gt k}]
+$$</p>
+</li>
+</ul>
+<p>Here $\Chart[Y_{i:j}]$ is shorthand for the product $\Chart[Y_i] \otimes \cdots \otimes \Chart[Y_{j-1}]$, and terminals always have value $\semione$ in $\Chart$ and $\NextChart$ and $\semizero$ in $\Change$.  Then set $\Chart \gets \NextChart$, $\Change \gets \NextChange$, and repeat until $\Chart$ stops changing.</p>
+<p><strong>Why it works.</strong>  On iteration $d$, $\Chart$ is the total weight of derivations of dimension $< d$, and $\Change$ is the total weight of derivations of dimension $= d$.  To see why, we argue that $\NextChange$ is precisely the sum of dimension $=d\!+\!1$ derivations.  Below, we illustrate how to build dimension $=d\!+\!1$ derivations inductively from the set of dimension $=d$ derivations, the set of dimension $\le d$ derivations, and the set of dimension $< d$ derivations.</p>
+<figure>
+<p><img src="./images/newton-step.svg" alt="A dimension d+1 derivation: a shaded spine of rules, whose side subtrees have dimension at most d, ending in a rule that combines two subtrees of dimension exactly d with dimension less than d subtrees between and after them, and at most d before them." style="width:100%"></p>
+</figure>
+
+<p>According to the definition, to create a dimension $\ge d\!+\!1$ derivation, we need to combine at least two $=d$ derivations.  That is why the base case combines two $=d$ derivations (with $< d$ derivations to their right and $\le d$ derivations to their left); this creates a subderivation with dimension equal to $d\!+\!1$.  Now, because all subderivations that can combine along the spine (the path up to the root) of the new derivation have dimension $\le d$, the new derivation has dimension $d\!+\!1$; this is the recursive case.  To ensure that the enumeration of $= d\!+\!1$ derivations is exhaustive, the linearized grammar includes every rule that can combine the $\le d$ subderivations and the base case of at least two $= d$ subderivations.  The linearized grammar is a compact encoding of the value of this potentially infinite set of $=d\!+\!1$ derivations.  Finally, $\NextChart$ is the sum of $\Chart$ and $\Change$, so at iteration $d$, $\Chart$ is the total value of all derivations of dimension $< d$.</p>
+<p>Notice that the recursive case contains a single unknown, $\NextChange[Y_k]$, and everything else is a constant from earlier iterations.  So each iteration of Newton's method solves a <em>linear</em> system, and every derivation of the original grammar is summed on the iteration equal to its dimension.  Over the reals, this is ordinary Newton's method: the coefficient of $\NextChange[Y_k]$ in the recursive case is the partial derivative $\partial f_X / \partial x_{Y_k}$ evaluated at $\NextChart$, and the base case equals $\boldsymbol{f}(\NextChart) \ominus \NextChart$.<label class="sidenote-number"></label><span class="margin-note">The base case collects the derivations whose children all have dimension $\le d$ but which themselves have dimension $d\!+\!1$, which is exactly the part of $\boldsymbol{f}(\NextChart)$ not already in $\NextChart$.  The <a href="https://github.com/timvieira/semiring-newton/blob/master/tests/test_post.py">tests</a> check that the iterates match textbook Newton's method on $x - f(x) = 0$ started from $x = 0$.</span></p>
+<h2 id="solving-the-linear-subproblems">Solving the linear subproblems</h2>
+<p>The linearized grammar has the form $\boldsymbol{x} = \boldsymbol{b} \oplus \boldsymbol{A}\, \boldsymbol{x}$ where $\boldsymbol{A} \in \mathbb{K}^{N \times N}$ and $\boldsymbol{b} \in \mathbb{K}^{N}$, provided that we can move each unknown to the right-hand end of its rule.  This is where we need <strong>commutativity</strong>: in the recursive case, the unknown $\NextChange[Y_k]$ sits between the constants $\NextChart[Y_{\lt k}]$ and $\NextChart[Y_{\gt k}]$, and we can only rewrite it as $\boldsymbol{A}_{X, Y_k} \otimes \NextChange[Y_k]$ with $\boldsymbol{A}_{X, Y_k} = w \otimes \NextChart[Y_{\lt k}] \otimes \NextChart[Y_{\gt k}]$ if we are allowed to permute the product.</p>
+<p>The solution of a right-linear system is given by the matrix star operation $\boldsymbol{x} = \boldsymbol{A}^* \, \boldsymbol{b}$, where $\boldsymbol{A}^* \overset{\text{def}}{=} \bigoplus_{i=0}^\infty \boldsymbol{A}^i$.  A useful perspective on the matrix star is that it computes the total weight of paths in a weighted directed graph: if $\boldsymbol{A}$ is the weighted adjacency matrix of a graph, then $\boldsymbol{A}_{ik}$ is the total weight of all paths of length $1$ from $i$ to $k$, $(\boldsymbol{A}\, \boldsymbol{A})_{ik}$ is the total weight of the paths of length $2$, and so on.  Paths may be regarded as a restricted family of right-recursive derivations; here they are the spines of the dimension $d\!+\!1$ derivations.  We compute $\boldsymbol{A}^*$ with <a href="https://doi.org/10.1016/0304-3975(77)90056-1">Lehmann's (1977)</a> algorithm, which runs in $\mathcal{O}(|N|^3)$ time.  Special cases of this algorithm for specific applications are well known, e.g.,</p>
+<ul>
+<li>matrix inversion (Gauss–Jordan elimination)<label class="sidenote-number"></label><span class="margin-note"><a href="http://www.jstor.org/stable/2322413">Althoen and McLaughlin (1987)</a> provide an interesting historical overview of the Gauss–Jordan elimination algorithm.</span></li>
+<li>all-pairs shortest path (<a href="https://doi.org/10.1145/367766.368168">Floyd, 1962</a>; <a href="https://doi.org/10.1145/321105.321107">Warshall, 1962</a>; <a href="https://gallica.bnf.fr/ark:/12148/bpt6k3201c/f222.image">Roy, 1959</a>)</li>
+<li>finite-state automaton to regular expression conversion (<a href="https://apps.dtic.mil/sti/pdfs/ADA596138.pdf">Kleene, 1956</a>)</li>
+<li>transitive closure (<a href="https://doi.org/10.1145/321105.321107">Warshall, 1962</a>)</li>
+</ul>
+<p>These problems were unified into what are often called <strong>algebraic path problems</strong> (<a href="https://doi.org/10.1016/0304-3975(77)90056-1">Lehmann, 1977</a>; <a href="https://doi.org/10.1145/322261.322272">Tarjan, 1981</a>).  Unifying these problems was just the (closed) semiring abstraction at work again!  A choice of semiring, with the same underlying algorithm that sums over all paths in a graph, solves all the above problems and many others.</p>
+<p><strong>Without commutativity.</strong>  Unfortunately, not all semirings are commutative, so permuting the right-hand side is not always allowed.  In general, each Newton step produces a <em>linear</em> grammar, not a right-linear one, and linear grammars are strictly more expressive.  The following grammar over the semiring of formal languages is linear but not right-linear:</p>
+<div class="highlight"><pre><span></span><code>S → a S b
+S → ε
+</code></pre></div>
+
+<p>Its solution is $\beta(\mathrm{S}) = \{ a^n b^n \mid n \in \mathbb{N} \}$, which is not a regular language; thus, it cannot be expressed as a finite expression involving $\otimes$, $\oplus$, and $(\cdot)^*$.  Unlike the commutative examples, we cannot transform this grammar into a right-linear one, so the right-linear solver cannot solve it; we would need a general linear solver.  Other tractable cases are discussed in the literature (e.g., <a href="https://doi.org/10.1007/978-3-540-73208-2_17">Esparza et al., 2007</a>; <a href="https://mediatum.ub.tum.de/doc/1273784/1273784.pdf">Schlund, 2016</a>; <a href="https://doi.org/10.1145/3024084">Reps et al., 2017</a>).  We note that fixpoint iteration is always available for (approximately) solving the linear subproblems; however, fixpoint iteration may not converge quickly (or at all).</p>
+<h2 id="code">Code</h2>
+<p>The <a href="https://github.com/timvieira/semiring-newton/blob/master/newton/newton.py">implementation</a> takes a grammar from the <a href="https://github.com/rycolab/left-corner"><code>leftcorner</code></a> package, which provides a WCFG class, several semirings, and Lehmann's algorithm (<code>cfg._lehmann</code>).  The main loop mirrors the description above:</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">_newton</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="c1"># initial chart is empty, except for terminals</span>
+    <span class="n">chart</span> <span class="o">=</span> <span class="n">Chart</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="p">,</span> <span class="p">{</span><span class="n">x</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">one</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">V</span><span class="p">})</span>
+    <span class="c1"># initialize with dimension-0 derivations</span>
+    <span class="n">change</span> <span class="o">=</span> <span class="n">linearize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chart</span><span class="p">,</span> <span class="n">chart</span><span class="p">,</span> <span class="n">chart</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">next_chart</span> <span class="o">=</span> <span class="n">chart</span> <span class="o">+</span> <span class="n">change</span><span class="o">.</span><span class="n">sol</span>
+        <span class="k">yield</span> <span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="n">change</span><span class="p">,</span> <span class="n">next_chart</span><span class="p">)</span>
+        <span class="n">change</span> <span class="o">=</span> <span class="n">linearize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chart</span><span class="p">,</span> <span class="n">change</span><span class="o">.</span><span class="n">sol</span><span class="p">,</span> <span class="n">next_chart</span><span class="p">)</span>
+        <span class="n">chart</span> <span class="o">=</span> <span class="n">next_chart</span>
+</code></pre></div>
+
+<p>The linearization builds the matrix $\boldsymbol{A}$ and vector $\boldsymbol{b}$.  The line <code>A[r.head, ys[k]] += ...</code> is where commutativity is used: the constant to the right of the unknown is folded into its coefficient.</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">linearize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chart</span><span class="p">,</span> <span class="n">change</span><span class="p">,</span> <span class="n">next_chart</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="c1"># Matrix and vector for linearized grammar</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">Chart</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="p">)</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">Chart</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="p">)</span>
+
+    <span class="c1"># recursive cases</span>
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+        <span class="n">ys</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">body</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ys</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_terminal</span><span class="p">(</span><span class="n">ys</span><span class="p">[</span><span class="n">k</span><span class="p">]):</span> <span class="k">continue</span>
+            <span class="n">A</span><span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">head</span><span class="p">,</span> <span class="n">ys</span><span class="p">[</span><span class="n">k</span><span class="p">]]</span> <span class="o">+=</span> <span class="p">(</span>
+                <span class="n">r</span><span class="o">.</span><span class="n">w</span>
+                <span class="o">*</span> <span class="n">next_chart</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">ys</span><span class="p">[:</span><span class="n">k</span><span class="p">])</span>
+                <span class="o">*</span> <span class="n">next_chart</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">ys</span><span class="p">[</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">:])</span>
+            <span class="p">)</span>
+
+    <span class="c1"># base cases for initialization</span>
+    <span class="k">if</span> <span class="n">init</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">is_terminal</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">body</span><span class="p">)):</span>
+                <span class="n">b</span><span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">head</span><span class="p">]</span> <span class="o">+=</span> <span class="n">r</span><span class="o">.</span><span class="n">w</span>
+
+    <span class="c1"># base cases for iterates</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">ys</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">body</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span> <span class="ow">in</span> <span class="n">combinations</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ys</span><span class="p">)),</span> <span class="mi">2</span><span class="p">):</span>
+                <span class="n">b</span><span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">head</span><span class="p">]</span> <span class="o">+=</span> <span class="p">(</span>
+                    <span class="n">r</span><span class="o">.</span><span class="n">w</span> <span class="o">*</span>
+                    <span class="n">next_chart</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">ys</span><span class="p">[:</span><span class="n">i</span><span class="p">])</span> <span class="o">*</span>
+                    <span class="n">change</span><span class="p">[</span><span class="n">ys</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">*</span>
+                    <span class="n">chart</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">ys</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="n">j</span><span class="p">])</span> <span class="o">*</span>
+                    <span class="n">change</span><span class="p">[</span><span class="n">ys</span><span class="p">[</span><span class="n">j</span><span class="p">]]</span> <span class="o">*</span>
+                    <span class="n">chart</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">ys</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">:])</span>
+                <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">Change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+</code></pre></div>
+
+<p>In the code, <code>chart</code>, <code>change</code>, and <code>next_chart</code> are $\Chart$, $\Change$, and $\NextChart$, and <code>Change</code> holds the linearized grammar whose solution is $\NextChange$.  During initialization, $\NextChart$ is zero on every nonterminal, so the matrix $\boldsymbol{A}$ only picks up rules with a single nonterminal, which matches the initialization above.  <code>Change.sol</code> computes $\boldsymbol{A}^* \boldsymbol{b}$.</p>
+<p>Using it:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">leftcorner</span><span class="w"> </span><span class="kn">import</span> <span class="n">CFG</span><span class="p">,</span> <span class="n">Real</span><span class="p">,</span> <span class="n">MaxTimes</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">newton</span><span class="w"> </span><span class="kn">import</span> <span class="n">newton</span>
+
+<span class="n">cfg</span> <span class="o">=</span> <span class="n">CFG</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">"""</span>
+<span class="s2">0.5: S → S S</span>
+<span class="s2">0.5: S → a</span>
+<span class="s2">"""</span><span class="p">,</span> <span class="n">Real</span><span class="p">)</span>
+
+<span class="n">newton</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>            <span class="c1"># {'a': 1, 'S': 0.9999999999990905}  (39 iterations)</span>
+<span class="n">cfg</span><span class="o">.</span><span class="n">naive_bottom_up</span><span class="p">()</span>  <span class="c1"># fixpoint iteration: needs ~2^k iterations for k bits</span>
+</code></pre></div>
+
+<p>The same code runs in any commutative semiring.  Here is a small grammar with prepositional-phrase attachment in the max-times (Viterbi) semiring:</p>
+<div class="highlight"><pre><span></span><code><span class="n">cfg</span> <span class="o">=</span> <span class="n">CFG</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">"""</span>
+<span class="s2">1.0: S → NP VP</span>
+<span class="s2">0.4: NP → NP PP</span>
+<span class="s2">0.6: NP → n</span>
+<span class="s2">0.7: VP → v NP</span>
+<span class="s2">0.3: VP → VP PP</span>
+<span class="s2">1.0: PP → p NP</span>
+<span class="s2">"""</span><span class="p">,</span> <span class="n">MaxTimes</span><span class="p">)</span>
+
+<span class="n">newton</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>   <span class="c1"># S: 0.252, NP: 0.6, VP: 0.42, PP: 0.6  (exact after one iteration)</span>
+</code></pre></div>
+
+<p>In commutative <em>idempotent</em> semirings like max-times, Newton's method reaches the exact solution after at most $|N|$ iterations (<a href="https://doi.org/10.1145/1857914.1857917">Esparza, Kiefer, and Luttenberger, 2010</a>).</p>
+<h2 id="notes">Notes</h2>
+<ul>
+<li><strong>Strongly connected components.</strong>  As noted in other work on Newton's method (e.g., <a href="https://mediatum.ub.tum.de/doc/1273784/1273784.pdf">Schlund, 2016</a>), decomposing the grammar into strongly connected components and solving them bottom-up can speed the algorithm up considerably, both for the Newton iterations and for the $\mathcal{O}(|N|^3)$ linear solver.  The implementation does not do this yet.</li>
+<li><strong>Speed–accuracy tradeoff.</strong>  Each Newton iteration costs a call to the linear solver, so it is much more expensive than a fixpoint iteration.  Often fixpoint iteration can reach a tolerable level of accuracy faster than the exact linear solver.<label class="sidenote-number"></label><span class="margin-note">The convergence rate of fixpoint iteration depends on the properties of the $\boldsymbol{A}$ matrix.  In the case of the real semiring, we can bound the number of iterations to reach a given error tolerance in terms of the spectral radius of $\boldsymbol{A}$.</span></li>
+</ul>
+<h2 id="references">References</h2>
+<ul>
+<li>Javier Esparza, Stefan Kiefer, and Michael Luttenberger. <a href="https://doi.org/10.1007/978-3-540-73208-2_17">An Extension of Newton's Method to ω-Continuous Semirings</a>. DLT 2007.</li>
+<li>Javier Esparza, Stefan Kiefer, and Michael Luttenberger. <a href="https://doi.org/10.1145/1857914.1857917">Newtonian Program Analysis</a>. JACM 2010.</li>
+<li>Kousha Etessami and Mihalis Yannakakis. <a href="https://doi.org/10.1145/1462153.1462154">Recursive Markov Chains, Stochastic Grammars, and Monotone Systems of Nonlinear Equations</a>. JACM 2009.</li>
+<li>Michael Luttenberger. <a href="https://d-nb.info/100090086X/34">Solving Polynomial Systems on Semirings: A Generalization of Newton's Method</a>. PhD thesis, 2009.</li>
+<li>Maximilian Schlund. <a href="https://mediatum.ub.tum.de/doc/1273784/1273784.pdf">Algebraic Systems of Fixpoint Equations over Semirings: Theory and Applications</a>. PhD thesis, 2016.</li>
+<li>Thomas Reps, Emma Turetsky, and Prathmesh Prabhu. <a href="https://doi.org/10.1145/3024084">Newtonian Program Analysis via Tensor Product</a>. TOPLAS 2017.</li>
+<li>Daniel J. Lehmann. <a href="https://doi.org/10.1016/0304-3975(77)90056-1">Algebraic Structures for Transitive Closure</a>. Theoretical Computer Science, 1977.</li>
+<li>Robert E. Tarjan. <a href="https://doi.org/10.1145/322261.322272">A Unified Approach to Path Problems</a>. JACM 1981.</li>
+<li>Mark-Jan Nederhof and Giorgio Satta. <a href="https://mjn.host.cs.st-andrews.ac.uk/publications/2008d.pdf">Computing Partition Functions of PCFGs</a>. Research on Language and Computation, 2008.</li>
+<li>Tim Vieira. <a href="https://timvieira.github.io/doc/2023-timv-dissertation.pdf">Automating the Analysis and Improvement of Dynamic Programming Algorithms with Applications to Natural Language Processing</a>. PhD thesis, 2023.</li>
+</ul>
     </div>
+    
   </article>
+
+  <!--
+  <section>
+    <h1 class="comments">Comments</h1>
+    <div id="disqus_thread" aria-live="polite">
+      <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+  </section>
+  -->
 </div>
 
 
 
-      
-      <aside class="sidebar">
-        <section>
-          <h1>Tags</h1>
-          
-        </section>
-      </aside>
       
     </div>
   </div>
   <footer role="contentinfo"></footer>
   <!--
   
-  -->
-  
-  <script>
-    window._activeTags = new Set();
-
-    function filterByTag(tag) {
-      var tags = window._activeTags;
-      if (tags.has(tag)) {
-        tags.delete(tag);
-      } else {
-        tags.add(tag);
-      }
-
-      // Step 1: Update tag highlights immediately
-      var noFilter = tags.size === 0;
-      document.querySelectorAll('.tag').forEach(function(el) {
-        el.classList.toggle('active', tags.has(el.textContent.trim()));
-      });
-
-      // Step 2: After tags visually update, start fading articles
-      setTimeout(function() {
-        var archives = document.getElementById('blog-archives');
-        var articles = archives.querySelectorAll('article');
-        var headers = archives.querySelectorAll('h2');
-
-        // Determine which articles match
-        var toHide = [];
-        var toShow = [];
-        articles.forEach(function(a) {
-          var aTags = a.getAttribute('data-tags').split(',');
-          var match = noFilter || Array.from(tags).every(function(t) { return aTags.indexOf(t) >= 0; });
-          if (!match && !a.classList.contains('hidden')) {
-            toHide.push(a);
-          } else if (match && a.classList.contains('hidden')) {
-            toShow.push(a);
-          }
-        });
-
-        // Fade out items that should hide
-        toHide.forEach(function(a) { a.classList.add('fading'); });
-
-        // After fade completes, collapse hidden and reveal new ones
-        setTimeout(function() {
-          toHide.forEach(function(a) {
-            a.classList.add('hidden');
-            a.classList.remove('fading');
-          });
-
-          // Show items that should appear (start faded, then fade in)
-          toShow.forEach(function(a) {
-            a.classList.add('fading');
-            a.classList.remove('hidden');
-          });
-          // Force reflow before removing fading class
-          if (toShow.length) archives.offsetHeight;
-          requestAnimationFrame(function() {
-            toShow.forEach(function(a) { a.classList.remove('fading'); });
-          });
-
-          // Update year headers
-          headers.forEach(function(h) {
-            var next = h.nextElementSibling;
-            var hasVisible = false;
-            while (next && next.tagName !== 'H2') {
-              if (next.tagName === 'ARTICLE' && !next.classList.contains('hidden')) hasVisible = true;
-              next = next.nextElementSibling;
-            }
-            h.classList.toggle('hidden', !hasVisible);
-          });
-
-          // Disable tags that would yield no results if added
-          var availableTags = new Set();
-          articles.forEach(function(a) {
-            if (!a.classList.contains('hidden')) {
-              a.getAttribute('data-tags').split(',').forEach(function(t) { availableTags.add(t); });
-            }
-          });
-          if (noFilter) {
-            document.querySelectorAll('.tag').forEach(function(el) { el.classList.remove('disabled'); });
-          } else {
-            tags.forEach(function(t) { availableTags.add(t); });
-            document.querySelectorAll('.tag').forEach(function(el) {
-              el.classList.toggle('disabled', !availableTags.has(el.textContent.trim()));
-            });
-          }
-        }, 250);
-
-        // Update URL hash
-        if (tags.size > 0) {
-          history.replaceState(null, '', '#tags=' + Array.from(tags).map(encodeURIComponent).join(','));
-        } else {
-          history.replaceState(null, '', location.pathname);
-        }
-      }, 150);
-    }
-
-    // Apply filter from URL hash on load (no animation)
+  <script type="text/javascript">
+    var disqus_shortname = 'graduatedescent';
+    var disqus_identifier = 'https://timvieira.github.io/blog/newtons-method-for-weighted-grammars/';
+    var disqus_url = 'https://timvieira.github.io/blog/newtons-method-for-weighted-grammars/';
+    var disqus_title = 'Newton's Method for Weighted Grammars';
     (function() {
-      var m = location.hash.match(/tags?=([^&]+)/);
-      if (m) {
-        m[1].split(',').forEach(function(t) { window._activeTags.add(decodeURIComponent(t)); });
-        var tags = window._activeTags;
-        var archives = document.getElementById('blog-archives');
-        var articles = archives.querySelectorAll('article');
-        var headers = archives.querySelectorAll('h2');
-        document.querySelectorAll('.tag').forEach(function(el) {
-          el.classList.toggle('active', tags.has(el.textContent.trim()));
-        });
-        articles.forEach(function(a) {
-          var aTags = a.getAttribute('data-tags').split(',');
-          var match = Array.from(tags).every(function(t) { return aTags.indexOf(t) >= 0; });
-          if (!match) a.classList.add('hidden');
-        });
-        headers.forEach(function(h) {
-          var next = h.nextElementSibling;
-          var hasVisible = false;
-          while (next && next.tagName !== 'H2') {
-            if (next.tagName === 'ARTICLE' && !next.classList.contains('hidden')) hasVisible = true;
-            next = next.nextElementSibling;
-          }
-          if (!hasVisible) h.classList.add('hidden');
-        });
-        var availableTags = new Set();
-        articles.forEach(function(a) {
-          if (!a.classList.contains('hidden')) {
-            a.getAttribute('data-tags').split(',').forEach(function(t) { availableTags.add(t); });
-          }
-        });
-        tags.forEach(function(t) { availableTags.add(t); });
-        document.querySelectorAll('.tag').forEach(function(el) {
-          el.classList.toggle('disabled', !availableTags.has(el.textContent.trim()));
-        });
-      }
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = "//" + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
     })();
   </script>
+  
+  -->
   
 <script>
 // Toggle sidenotes on narrow screens

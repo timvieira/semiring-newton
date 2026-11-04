@@ -31,6 +31,8 @@ with $\beta(a) = \semione$ for each terminal $a$.  Depending on the semiring, $\
 
 The standard approach is **fixpoint iteration**: start every nonterminal at $\semizero$ and apply the equations above as an update until nothing changes.  On iteration $t$, fixpoint iteration's estimate equals the total weight of all derivations of height $\le t$.<footnote>We start with every nonterminal at $\semizero$.  From there, we build height $\le 1$ derivations from rules whose right-hand sides contain only terminals.  Each application of the update combines the values of height $\le t$ derivations by applying the rules of the grammar to derive the values of all height $\le t\!+\!1$ derivations.</footnote>  It converges in the limit, but it can be very slow.
 
+<img src="../images/newton-convergence.png" class="right" alt="Portrait of Isaac Newton" style="width: 160px;">
+
 This post describes a much faster method: **Newton's method, generalized to semirings**.  The idea is due to [Esparza, Kiefer, and Luttenberger (2007)](https://doi.org/10.1007/978-3-540-73208-2_17); the presentation below is adapted from chapter 5 of [my dissertation](https://timvieira.github.io/doc/2023-timv-dissertation.pdf), specialized here from Dyna programs to grammars.  The [code](https://github.com/timvieira/semiring-newton) works for any commutative semiring.
 
 
