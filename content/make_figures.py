@@ -295,8 +295,8 @@ def height_dimension_figure():
     Two derivations under S -0.5-> S S, S -0.5-> a, drawn like the derivations
     in the dissertation: internal nodes are labeled by nonterminals (in
     typewriter font), and the leaves are the rule weights (semiring values,
-    in magenta) and terminals.  Each nonterminal node shows its
-    height (its row) and dimension (its shading): a right-branching "caterpillar" (tall but
+    in magenta) and terminals.  Each nonterminal node is annotated with its
+    height (h) and dimension (d): a right-branching "caterpillar" (tall but
     dimension 1) and a balanced tree (short, but higher dimension).
     """
     W8 = '0.5'
@@ -322,26 +322,15 @@ def height_dimension_figure():
         m = max(ds)
         return m if ds.count(m) == 1 else m + 1
 
-    VALC = 'magenta'
-    TT = 'font-family="ui-monospace, Menlo, Consolas, monospace"'
-    # dimension -> node fill (one hue, light to dark) and label ink
-    DIMFILL = {0: ('#ece9f7', INK), 1: ('#b3aae0', INK), 2: ('#6f62c4', '#fff')}
-    gap, dy, top, left = 27, 40, 34, 74
-    hmax = max(height(cat), height(bal))
-    W, H = 800, top + hmax * dy + 80
+    W, H = 920, 300
     svg = SVG(W, H)
-    Y = lambda h: top + (hmax - h) * dy     # height -> row (leaves on the bottom row)
-
-    # height scale with faint guide lines
-    for h in range(hmax + 1):
-        svg.line(left - 8, Y(h), W - 12, Y(h), color='#e6e1d8', width=1)
-        svg.text(left - 14, Y(h) + 4, str(h), size=11, color=GRAY, anchor='end')
-    svg.add(f'<text x="16" y="{(Y(0) + Y(hmax)) / 2:.1f}" font-size="12" fill="{GRAY}" text-anchor="middle" '
-            f'transform="rotate(-90 16 {(Y(0) + Y(hmax)) / 2:.1f})">height</text>')
+    DIMC, HC, VALC = '#332288', GRAY, 'magenta'
+    dy, gap = 40, 34
+    TT = 'font-family="ui-monospace, Menlo, Consolas, monospace"'
 
     def draw(t, x0, title):
         # leaves (weights and terminals) get consecutive x slots; each parent is
-        # centered over its children; every node sits on the row of its height.
+        # centered over its children.  Positions are keyed by path from the root.
         pos, k = {}, [0]
         def kids(t):
             return [('w', t[1])] + t[2]           # the weight leaf comes first
@@ -355,37 +344,28 @@ def height_dimension_figure():
         layout(t, ())
 
         def render(t, path):
-            x, y = pos[path], Y(height(t))
+            x, y = pos[path], 52 + len(path) * dy
+            if not is_rule(t):
+                svg.text(x, y + 5, t, size=14, extra=' ' + TT)          # terminal
+                return
             for i, c in enumerate(kids(t)):
-                cx = pos[path + (i,)]
-                cy = Y(height(c) if is_rule(c) else 0)
-                svg.line(x, y + 9, cx, cy - 9, width=0.8)
-                if is_rule(c):
-                    render(c, path + (i,))
-                elif isinstance(c, tuple):
-                    svg.text(cx, cy + 4, c[1], size=12, color=VALC)                 # rule weight
+                cx, cy = pos[path + (i,)], y + dy
+                svg.line(x, y + 7, cx, cy - 10, width=0.8)
+                if isinstance(c, tuple) and c[0] == 'w':
+                    svg.text(cx, cy + 5, c[1], size=12, color=VALC)     # rule weight
                 else:
-                    svg.text(cx, cy + 5, c, size=14, extra=' ' + TT)                # terminal
-            fill, ink = DIMFILL[dim(t)]
-            svg.add(f'<rect x="{x - 10:.1f}" y="{y - 10:.1f}" width="20" height="20" rx="4" '
-                    f'fill="{fill}" stroke="{INK}" stroke-width="0.6"/>')
-            svg.text(x, y + 5, t[0], size=14, color=ink, extra=' ' + TT)
+                    render(c, path + (i,))
+            svg.text(x, y + 5, t[0], size=15, extra=' ' + TT)
+            svg.text(x + 9, y - 6, f'<tspan fill="{HC}">h={height(t)},</tspan> '
+                     f'<tspan fill="{DIMC}">d={dim(t)}</tspan>', size=10, anchor='start')
         render(t, ())
-        svg.text(pos[()], 14, title, size=13, color=INK)
+        svg.text(pos[()], 18, title, size=14, color=INK)
 
-    draw(cat, left + 10, 'height 5, dimension 1')
-    draw(bal, left + 410, 'height 3, dimension 2')
-
-    # legend
-    lx, ly = left, H - 30
-    svg.text(lx, ly + 5, 'dimension:', size=12, color=GRAY, anchor='start')
-    for i, d in enumerate([0, 1, 2]):
-        fill, ink = DIMFILL[d]
-        x = lx + 82 + 52 * i
-        svg.add(f'<rect x="{x}" y="{ly - 9}" width="18" height="18" rx="4" fill="{fill}" stroke="{INK}" stroke-width="0.6"/>')
-        svg.text(x + 24, ly + 5, str(d), size=12, color=GRAY, anchor='start')
-    svg.text(lx + 260, ly + 5, f'leaves: rule weights (<tspan fill="{VALC}">magenta</tspan>) and terminals',
-             size=12, color=GRAY, anchor='start')
+    draw(cat, 20, 'height 5, dimension 1')
+    draw(bal, 530, 'height 3, dimension 2')
+    svg.text(W / 2, H - 8, f'<tspan fill="{HC}">h</tspan> = height, '
+             f'<tspan fill="{DIMC}">d</tspan> = dimension; '
+             f'leaves are rule weights (<tspan fill="{VALC}">magenta</tspan>) and terminals', size=12, color=GRAY)
 
     svg.save(OUT / 'height-dimension.svg', 'Height and dimension of two derivations')
 
