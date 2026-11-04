@@ -65,7 +65,7 @@ status: draft
 Proofs, side examples, and background are tucked into collapsible blocks (▸) for readers who want more depth.
 </div>
 
-A weighted context-free grammar $\mathcal{G}$ assigns a semiring value $\sem{X} \in \Values$ to each nonterminal $X$: the total weight of all derivations $\deriv$ rooted at $X$,
+A weighted context-free grammar $\mathcal{G}$ is a set of rules $X \xrightarrow{w} Y_1 \cdots Y_K$, each of which rewrites a nonterminal $X$ into a sequence of symbols $Y_1 \cdots Y_K$ with a weight $w \in \Values$.  It assigns a semiring value $\sem{X} \in \Values$ to each nonterminal $X$: the total weight of all derivations $\deriv$ rooted at $X$,
 
 $$
 \sem{X} = \bigoplus_{\deriv \in \mathcal{D}(X)} w(\deriv),
@@ -74,7 +74,7 @@ $$
 where the weight $w(\deriv)$ of a derivation is the $\otimes$-product of the weights of the rules it uses.  When the grammar is recursive, $\mathcal{D}(X)$ is infinite, and $\sem{\cdot}$ is the least solution to the system of fixpoint equations
 
 $$
-\sem{X} = \bigoplus_{(X \to Y_1 \cdots Y_K) \in \mathcal{G}} w(X \to Y_1 \cdots Y_K) \otimes \sem{Y_1} \otimes \cdots \otimes \sem{Y_K},
+\sem{X} = \bigoplus_{(X \xrightarrow{w} Y_1 \cdots Y_K) \in \mathcal{G}} w \otimes \sem{Y_1} \otimes \cdots \otimes \sem{Y_K},
 $$
 
 with $\sem{a} = \semione$ for each terminal $a$.
@@ -93,7 +93,7 @@ where each component $f_X$ is a polynomial.  The grammar problem and the algebra
 | grammar | algebraic system |
 |:--------|:-----------------|
 | nonterminal $X$ | variable $X$ |
-| rule $X \to Y_1 \cdots Y_K$ with weight $w$ | monomial $w \otimes Y_1 \otimes \cdots \otimes Y_K$ in $f_X$ |
+| rule $X \xrightarrow{w} Y_1 \cdots Y_K$ | monomial $w \otimes Y_1 \otimes \cdots \otimes Y_K$ in $f_X$ |
 | terminal $a$ | constant (its weight; the symbol $a$ itself in the semiring of formal languages) |
 | derivation (parse tree) $\deriv$ | a term $w(\deriv)$ in the expansion of the solution |
 | total weight $\sem{X}$ of all derivations of $X$ | the $X$ component of the least solution |
@@ -158,7 +158,7 @@ Etessami and Yannakakis show that fixpoint iteration is exponentially slower tha
 </figure>
 
 <div class="theorem" markdown="1">
-**Definition.** The **dimension** $\Dim{\deriv}$ of a derivation $\deriv$ is defined inductively.  Suppose $\deriv$ is rooted at a rule $X \to Y_1 \cdots Y_K$, and let $\deriv_1, \ldots, \deriv_m$ be its subderivations for the *nonterminal* children (terminal children are ignored).
+**Definition.** The **dimension** $\Dim{\deriv}$ of a derivation $\deriv$ is defined inductively.  Suppose $\deriv$ is rooted at a rule $X \xrightarrow{w} Y_1 \cdots Y_K$, and let $\deriv_1, \ldots, \deriv_m$ be its subderivations for the *nonterminal* children (terminal children are ignored).
 
 * If $m = 0$: $\Dim{\deriv} \overset{\text{def}}{=} 0$.
 * If $m \ge 1$: Let $d = \max(\Dim{\deriv_1}, \ldots, \Dim{\deriv_m})$.  If the argmax is unique (i.e., no ties for the max), $\Dim{\deriv} \overset{\text{def}}{=} d$.  Otherwise, $\Dim{\deriv} \overset{\text{def}}{=} d+1$.
@@ -193,7 +193,7 @@ $$
 &\textbf{def } \NewtonStep(\mathcal{G}, \Chart, \Change): \\
 &\quad \NextChart \gets \Chart \doplus \Change \\
 &\quad \NextChange \gets \NewGrammar \\
-&\quad \textbf{for } (X \to Y_1 \cdots Y_K) \in \mathcal{G} \text{ with weight } w: \\
+&\quad \textbf{for } (X \xrightarrow{w} Y_1 \cdots Y_K) \in \mathcal{G}: \\
 &\quad\quad \Comment{\text{Base case: combine at least two derivations with dimension } \dEQ} \\
 &\quad\quad \textbf{for } 1 \le i \lt j \le K: \\
 &\quad\quad\quad \NextChange[X] \dopluseq w \dotimes \NextChart[Y_{[:i)}] \dotimes \Change[Y_i] \dotimes \Chart[Y_{(i:j)}] \dotimes \Change[Y_j] \dotimes \Chart[Y_{(j:]}] \\
@@ -205,7 +205,7 @@ $$
 &\textbf{def } \NewtonInit(\mathcal{G}): \\
 &\quad \Comment{\text{Initial set of new derivations}} \\
 &\quad \Chart \gets \NewGrammar;\ \NextChange \gets \NewGrammar \\
-&\quad \textbf{for } (X \to Y_1 \cdots Y_K) \in \mathcal{G} \text{ with weight } w \\
+&\quad \textbf{for } (X \xrightarrow{w} Y_1 \cdots Y_K) \in \mathcal{G} \\
 &\quad\quad\quad \textbf{where } \text{at most } 1 \text{ of } Y_1, \ldots, Y_K \text{ is a nonterminal}: \\
 &\quad\quad \NextChange[X] \dopluseq w \dotimes Y_1 \dotimesdots Y_K \\
 &\quad \textbf{return } \langle \Chart, \solveLinear{\NextChange} \rangle \quad \Comment{\text{Solve using the specialized linear solver (below)}}
@@ -314,7 +314,7 @@ $$
 &\quad N \gets \text{the nonterminals of } \mathcal{G} \\
 &\quad \boldsymbol{A} \gets \semizero^{N \times N};\ \boldsymbol{b} \gets \semizero^{N} \\
 &\quad \Comment{\text{Assemble the matrix } \boldsymbol{A} \text{ and vector } \boldsymbol{b} \text{ for the right-linear solver}} \\
-&\quad \textbf{for } (X \to Y_1 \cdots Y_K) \in \mathcal{G} \text{ with weight } w: \\
+&\quad \textbf{for } (X \xrightarrow{w} Y_1 \cdots Y_K) \in \mathcal{G}: \\
 &\quad\quad \textbf{if } Y_1 \cdots Y_K \text{ are all terminals}: \\
 &\quad\quad\quad \boldsymbol{b}_{X} \mathrel{\oplus}= w \\
 &\quad\quad \textbf{elif } Y_1 \cdots Y_K = a_1 \cdots a_{K-1}\, Y \text{ where } a_1, \ldots, a_{K-1} \text{ are terminals}: \\
@@ -354,7 +354,7 @@ $$
 &\quad \textbf{for } \sigma \in \SccName(\mathcal{G}): \quad \Comment{\text{Topologically ordered list of SCCs}} \\
 &\quad\quad \Comment{\text{Restrict } \mathcal{G} \text{ to the nonterminals in the current component, } \sigma} \\
 &\quad\quad \mathcal{G}' \gets \NewGrammar \\
-&\quad\quad \textbf{for } (X \to Y_1 \cdots Y_K) \in \mathcal{G} \text{ with weight } w \textbf{ where } X \in \sigma: \\
+&\quad\quad \textbf{for } (X \xrightarrow{w} Y_1 \cdots Y_K) \in \mathcal{G} \textbf{ where } X \in \sigma: \\
 &\quad\quad\quad \Comment{\text{Fold symbols outside } \sigma \text{ (already solved) into the weight}} \\
 &\quad\quad\quad \mathcal{G}'[X] \dopluseq \big(w \dotimes \dbigotimes_{Y_k \notin \sigma} \Chart[Y_k]\big) \dotimes \dbigotimes_{Y_k \in \sigma} Y_k \\
 &\quad\quad \Comment{\text{Solve the subgrammar with the best applicable method}} \\
