@@ -60,6 +60,12 @@ class SVG:
     def dot(self, x, y, r=4.5):
         self.add(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{r}" fill="{INK}"/>')
 
+    def dots(self, x, y, vertical=False, r=1.3, step=5):
+        "Three small dots centered at (x, y), like TikZ's \\cdots node."
+        for k in (-1, 0, 1):
+            dx, dy = (0, k*step) if vertical else (k*step, 0)
+            self.dot(x + dx, y + dy, r=r)
+
     def save(self, path, title):
         svg = (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {self.w} {self.h}" '
                f'font-family="Georgia, \'Times New Roman\', serif" role="img">\n'
@@ -79,21 +85,21 @@ def dimension_figure():
     """
     W, rowh = 640, 150
     svg = SVG(W, 3*rowh - 10)
-    gap = 52
+    gap = 64
 
-    def tree(y0, children, x0):
-        "children: list of (label_html, kind) or '…'; returns right edge."
+    def tree(y0, children, x0, dots_after):
+        """children: list of (label_html, kind).  As in the TikZ original,
+        dots sit midway between the labels of neighboring children i, i+1
+        for i in dots_after.  Returns the right edge."""
         xs = [x0 + gap*i for i in range(len(children))]
         mid = (xs[0] + xs[-1]) / 2
         svg.text(mid, y0, '<tspan font-style="italic">X</tspan>', size=17)
-        for x, c in zip(xs, children):
-            if c == '…':
-                svg.text(x, y0 + 52, '⋯', size=16)
-                continue
-            label, kind = c
+        for x, (label, kind) in zip(xs, children):
             svg.line(mid, y0 + 6, x, y0 + 38, width=0.9)
             svg.text(x, y0 + 54, label, size=15)
-            svg.triangle(x, y0 + 60, kind)
+            svg.triangle(x, y0 + 62, kind)
+        for i in dots_after:
+            svg.dots((xs[i] + xs[i+1]) / 2, y0 + 49)
         return xs[-1]
 
     def bracket(x, y, h, right=False):
@@ -110,18 +116,18 @@ def dimension_figure():
     for x, a in [(106, 'a'), (154, 'b')]:
         svg.line(130, y + 6, x, y + 38, width=0.9)
         svg.text(x, y + 54, a, size=15, italic=True)
-    svg.text(130, y + 54, '⋯', size=14)
+    svg.dots(130, y + 49)
     bracket(178, y - 14, 100, right=True)
     svg.text(196, y + 52, '= 0', size=17, anchor='start')
     svg.text(280, y + 52, '(no nonterminal children)', size=13, color=GRAY, anchor='start')
 
     # Row 2: two maximal children → d+1
     y = 30 + rowh
-    kids = [(sub('Y', 1), 'LE'), '…', (sub('Y', 'i−1'), 'LE'), (sub('Y', 'i'), 'EQ'),
-            (sub('Y', 'i+1'), 'LT'), '…', (sub('Y', 'j'), 'EQ'), (sub('Y', 'j+1'), 'LT'), '…', (sub('Y', 'K'), 'LT')]
+    kids = [(sub('Y', 1), 'LE'), (sub('Y', 'i−1'), 'LE'), (sub('Y', 'i'), 'EQ'), (sub('Y', 'i+1'), 'LT'),
+            (sub('Y', 'j−1'), 'LT'), (sub('Y', 'j'), 'EQ'), (sub('Y', 'j+1'), 'LT'), (sub('Y', 'K'), 'LT')]
     svg.text(4, y + 52, 'dim', size=17, anchor='start')
     bracket(48, y - 14, 112)
-    right = tree(y, kids, 76)
+    right = tree(y, kids, 76, dots_after=[0, 3, 6])
     bracket(right + 24, y - 14, 112, right=True)
     svg.text(right + 42, y + 52,
              f'= <tspan fill="{NEXT_CHANGE}"><tspan font-style="italic">d</tspan>+1</tspan>',
@@ -129,11 +135,11 @@ def dimension_figure():
 
     # Row 3: a unique maximal child → d
     y = 30 + 2*rowh
-    kids = [(sub('Y', 1), 'LT'), '…', (sub('Y', 'k−1'), 'LT'), (sub('Y', 'k'), 'EQ'),
-            (sub('Y', 'k+1'), 'LT'), '…', (sub('Y', 'K'), 'LT')]
+    kids = [(sub('Y', 1), 'LT'), (sub('Y', 'k−1'), 'LT'), (sub('Y', 'k'), 'EQ'),
+            (sub('Y', 'k+1'), 'LT'), (sub('Y', 'K'), 'LT')]
     svg.text(4, y + 52, 'dim', size=17, anchor='start')
     bracket(48, y - 14, 112)
-    right = tree(y, kids, 76)
+    right = tree(y, kids, 76, dots_after=[0, 3])
     bracket(right + 24, y - 14, 112, right=True)
     svg.text(right + 42, y + 52,
              f'= <tspan fill="{CHANGE}" font-style="italic">d</tspan>', size=17, anchor='start')
@@ -170,13 +176,17 @@ def newton_step_figure():
     for head in (m1, m2, m3):
         side(head, [-3*sib, -2*sib], 'LE')
         side(head, [2*sib, 3*sib], 'LE')
-        svg.text(head[0] - 2.5*sib, head[1] + 30, '⋯', size=13)
-        svg.text(head[0] + 2.5*sib, head[1] + 30, '⋯', size=13)
+        # dots in the gap between neighboring subtrees, clear of the edges
+        svg.dots(head[0] - 2.5*sib, head[1] + 34 + 10)
+        svg.dots(head[0] + 2.5*sib, head[1] + 34 + 10)
 
     # spine edges with dots (unbounded depth)
+    # (TikZ: a yellow-filled \\cdots node laid along the edge, breaking the line)
     for a, b in [(m1, m2), (m2, m3)]:
         svg.line(*a, *b)
-        svg.text(a[0] + 0, (a[1] + b[1]) / 2 + 5, '⋮', size=18)
+        cy = (a[1] + b[1]) / 2
+        svg.add(f'<rect x="{a[0]-5}" y="{cy-11}" width="10" height="22" fill="{SPINE}"/>')
+        svg.dots(a[0], cy, vertical=True, r=1.6, step=6)
     svg.line(*m3, *m4)
 
     # base case: two =d subtrees, ≤d to the left of the first, <d elsewhere
@@ -186,7 +196,7 @@ def newton_step_figure():
         svg.line(m4[0], m4[1], x, m4[1] + 34, width=0.9)
         svg.triangle(x, m4[1] + 34, k, w=28, h=26)
     for i in (0, 3, 6):
-        svg.text((xs[i] + xs[i+1]) / 2, m4[1] + 30, '⋯', size=13)
+        svg.dots((xs[i] + xs[i+1]) / 2, m4[1] + 34 + 10)
 
     for head in (m1, m2, m3, m4):
         svg.dot(*head)
