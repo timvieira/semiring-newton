@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 440" font-family="Georgia, 'Times New Roman', serif" role="img">
+<title>The dimension of a derivation</title>
+<text x="40.0" y="82.0" font-size="17" fill="#333" text-anchor="start">dim</text>
+<path d="M 84.0 16.0 Q 72.0 66.0 84.0 116.0" fill="none" stroke="#333" stroke-width="1.2"/>
+<text x="130.0" y="30.0" font-size="17" fill="#333" text-anchor="middle"><tspan font-style="italic">X</tspan></text>
+<line x1="130.0" y1="36.0" x2="106.0" y2="68.0" stroke="#333" stroke-width="0.9"/>
+<text x="106.0" y="84.0" font-size="15" fill="#333" text-anchor="middle" font-style="italic">a</text>
+<line x1="130.0" y1="36.0" x2="154.0" y2="68.0" stroke="#333" stroke-width="0.9"/>
+<text x="154.0" y="84.0" font-size="15" fill="#333" text-anchor="middle" font-style="italic">b</text>
+<text x="130.0" y="84.0" font-size="14" fill="#333" text-anchor="middle">⋯</text>
+<path d="M 178.0 16.0 Q 190.0 66.0 178.0 116.0" fill="none" stroke="#333" stroke-width="1.2"/>
+<text x="196.0" y="82.0" font-size="17" fill="#333" text-anchor="start">= 0</text>
+<text x="280.0" y="82.0" font-size="13" fill="#888" text-anchor="start">(no nonterminal children)</text>
+<text x="4.0" y="232.0" font-size="17" fill="#333" text-anchor="start">dim</text>
+<path d="M 48.0 166.0 Q 36.0 222.0 48.0 278.0" fill="none" stroke="#333" stroke-width="1.2"/>
+<text x="310.0" y="180.0" font-size="17" fill="#333" text-anchor="middle"><tspan font-style="italic">X</tspan></text>
+<line x1="310.0" y1="186.0" x2="76.0" y2="218.0" stroke="#333" stroke-width="0.9"/>
+<text x="76.0" y="234.0" font-size="15" fill="#333" text-anchor="middle"><tspan font-style="italic">Y</tspan><tspan font-size="70%" baseline-shift="sub">1</tspan></text>
+<polygon points="76.0,240.0 59.0,270.0 93.0,270.0" fill="#c490aa" stroke="#333" stroke-width="0.8"/>
+<text x="76.0" y="264.0" font-size="10" fill="#333" text-anchor="middle">≤<tspan font-style="italic">d</tspan></text>
+<text x="128.0" y="232.0" font-size="16" fill="#333" text-anchor="middle">⋯</text>
+<line x1="310.0" y1="186.0" x2="180.0" y2="218.0" stroke="#333" stroke-width="0.9"/>
+<text x="180.0" y="234.0" font-size="15" fill="#333" text-anchor="middle"><tspan font-style="italic">Y</tspan><tspan font-size="70%" baseline-shift="sub">i−1</tspan></text>
+<polygon points="180.0,240.0 163.0,270.0 197.0,270.0" fill="#c490aa" stroke="#333" stroke-width="0.8"/>
+<text x="180.0" y="264.0" font-size="10" fill="#333" text-anchor="middle">≤<tspan font-style="italic">d</tspan></text>
+<line x1="310.0" y1="186.0" x2="232.0" y2="218.0" stroke="#333" stroke-width="0.9"/>
+<text x="232.0" y="234.0" font-size="15" fill="#333" text-anchor="middle"><tspan font-style="italic">Y</tspan><tspan font-size="70%" baseline-shift="sub">i</tspan></text>
+<polygon points="232.0,240.0 215.0,270.0 249.0,270.0" fill="#e6b2bb" stroke="#333" stroke-width="0.8"/>
+<text x="232.0" y="264.0" font-size="10" fill="#333" text-anchor="middle">=<tspan font-style="italic">d</tspan></text>
+<line x1="310.0" y1="186.0" x2="284.0" y2="218.0" stroke="#333" stroke-width="0.9"/>
+<text x="284.0" y="234.0" font-size="15" fill="#333" text-anchor="middle"><tspan font-style="italic">Y</tspan><tspan font-size="70%" baseline-shift="sub">i+1</tspan></text>
+<polygon points="284.0,240.0 267.0,270.0 301.0,270.0" fill="#a28bd6" stroke="#333" stroke-width="0.8"/>
+<text x="284.0" y="264.0" font-size="10" fill="#333" text-anchor="middle">&lt;<tspan font-style="italic">d</tspan></text>
+<text x="336.0" y="232.0" font-size="16" fill="#333" text-anchor="middle">⋯</text>
+<line x1="310.0" y1="186.0" x2="388.0" y2="218.0" stroke="#333" stroke-width="0.9"/>
+<text x="388.0" y="234.0" font-size="15" fill="#333" text-anchor="middle"><tspan font-style="italic">Y</tspan><tspan font-size="70%" baseline-shift="sub">j</tspan></text>
+<polygon points="388.0,240.0 371.0,270.0 405.0,270.0" fill="#e6b2bb" stroke="#333" stroke-width="0.8"/>
+<text x="388.0" y="264.0" font-size="10" fill="#333" text-anchor="middle">=<tspan font-style="italic">d</tspan></text>
+<line x1="310.0" y1="186.0" x2="440.0" y2="218.0" stroke="#333" stroke-width="0.9"/>
+<text x="440.0" y="234.0" font-size="15" fill="#333" text-anchor="middle"><tspan font-style="italic">Y</tspan><tspan font-size="70%" baseline-shift="sub">j+1</tspan></text>
+<polygon points="440.0,240.0 423.0,270.0 457.0,270.0" fill="#a28bd6" stroke="#333" stroke-width="0.8"/>
+<text x="440.0" y="264.0" font-size="10" fill="#333" text-anchor="middle">&lt;<tspan font-style="italic">d</tspan></text>
+<text x="492.0" y="232.0" font-size="16" fill="#333" text-anchor="middle">⋯</text>
+<line x1="310.0" y1="186.0" x2="544.0" y2="218.0" stroke="#333" stroke-width="0.9"/>
+<text x="544.0" y="234.0" font-size="15" fill="#333" text-anchor="middle"><tspan font-style="italic">Y</tspan><tspan font-size="70%" baseline-shift="sub">K</tspan></text>
+<polygon points="544.0,240.0 527.0,270.0 561.0,270.0" fill="#a28bd6" stroke="#333" stroke-width="0.8"/>
+<text x="544.0" y="264.0" font-size="10" fill="#333" text-anchor="middle">&lt;<tspan font-style="italic">d</tspan></text>
+<path d="M 568.0 166.0 Q 580.0 222.0 568.0 278.0" fill="none" stroke="#333" stroke-width="1.2"/>
+<text x="586.0" y="232.0" font-size="17" fill="#333" text-anchor="start">= <tspan fill="#b53389"><tspan font-style="italic">d</tspan>+1</tspan></text>
+<text x="4.0" y="382.0" font-size="17" fill="#333" text-anchor="start">dim</text>
+<path d="M 48.0 316.0 Q 36.0 372.0 48.0 428.0" fill="none" stroke="#333" stroke-width="1.2"/>
+<text x="232.0" y="330.0" font-size="17" fill="#333" text-anchor="middle"><tspan font-style="italic">X</tspan></text>
+<line x1="232.0" y1="336.0" x2="76.0" y2="368.0" stroke="#333" stroke-width="0.9"/>
+<text x="76.0" y="384.0" font-size="15" fill="#333" text-anchor="middle"><tspan font-style="italic">Y</tspan><tspan font-size="70%" baseline-shift="sub">1</tspan></text>
+<polygon points="76.0,390.0 59.0,420.0 93.0,420.0" fill="#a28bd6" stroke="#333" stroke-width="0.8"/>
+<text x="76.0" y="414.0" font-size="10" fill="#333" text-anchor="middle">&lt;<tspan font-style="italic">d</tspan></text>
+<text x="128.0" y="382.0" font-size="16" fill="#333" text-anchor="middle">⋯</text>
+<line x1="232.0" y1="336.0" x2="180.0" y2="368.0" stroke="#333" stroke-width="0.9"/>
+<text x="180.0" y="384.0" font-size="15" fill="#333" text-anchor="middle"><tspan font-style="italic">Y</tspan><tspan font-size="70%" baseline-shift="sub">k−1</tspan></text>
+<polygon points="180.0,390.0 163.0,420.0 197.0,420.0" fill="#a28bd6" stroke="#333" stroke-width="0.8"/>
+<text x="180.0" y="414.0" font-size="10" fill="#333" text-anchor="middle">&lt;<tspan font-style="italic">d</tspan></text>
+<line x1="232.0" y1="336.0" x2="232.0" y2="368.0" stroke="#333" stroke-width="0.9"/>
+<text x="232.0" y="384.0" font-size="15" fill="#333" text-anchor="middle"><tspan font-style="italic">Y</tspan><tspan font-size="70%" baseline-shift="sub">k</tspan></text>
+<polygon points="232.0,390.0 215.0,420.0 249.0,420.0" fill="#e6b2bb" stroke="#333" stroke-width="0.8"/>
+<text x="232.0" y="414.0" font-size="10" fill="#333" text-anchor="middle">=<tspan font-style="italic">d</tspan></text>
+<line x1="232.0" y1="336.0" x2="284.0" y2="368.0" stroke="#333" stroke-width="0.9"/>
+<text x="284.0" y="384.0" font-size="15" fill="#333" text-anchor="middle"><tspan font-style="italic">Y</tspan><tspan font-size="70%" baseline-shift="sub">k+1</tspan></text>
+<polygon points="284.0,390.0 267.0,420.0 301.0,420.0" fill="#a28bd6" stroke="#333" stroke-width="0.8"/>
+<text x="284.0" y="414.0" font-size="10" fill="#333" text-anchor="middle">&lt;<tspan font-style="italic">d</tspan></text>
+<text x="336.0" y="382.0" font-size="16" fill="#333" text-anchor="middle">⋯</text>
+<line x1="232.0" y1="336.0" x2="388.0" y2="368.0" stroke="#333" stroke-width="0.9"/>
+<text x="388.0" y="384.0" font-size="15" fill="#333" text-anchor="middle"><tspan font-style="italic">Y</tspan><tspan font-size="70%" baseline-shift="sub">K</tspan></text>
+<polygon points="388.0,390.0 371.0,420.0 405.0,420.0" fill="#a28bd6" stroke="#333" stroke-width="0.8"/>
+<text x="388.0" y="414.0" font-size="10" fill="#333" text-anchor="middle">&lt;<tspan font-style="italic">d</tspan></text>
+<path d="M 412.0 316.0 Q 424.0 372.0 412.0 428.0" fill="none" stroke="#333" stroke-width="1.2"/>
+<text x="430.0" y="382.0" font-size="17" fill="#333" text-anchor="start">= <tspan fill="#CC6677" font-style="italic">d</tspan></text>
+</svg>

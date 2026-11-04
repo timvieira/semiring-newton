@@ -3,3 +3,4 @@
 # holds the README's image.
 content = "content"
 output = "output"
+static = ["images"]

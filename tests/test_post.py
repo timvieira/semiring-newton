@@ -107,3 +107,17 @@ def test_post_code_matches_source():
     blocks = re.findall(r'```python\n(.*?)```', post, re.DOTALL)
     for fn in [_newton, linearize]:
         assert inspect.getsource(fn) in blocks, fn.__name__
+
+
+def test_figures_are_up_to_date(tmp_path, monkeypatch):
+    # The committed SVGs must match what content/make_figures.py draws.
+    import importlib.util
+    path = POST.parent / 'make_figures.py'
+    spec = importlib.util.spec_from_file_location('make_figures', path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    monkeypatch.setattr(mod, 'OUT', tmp_path)
+    mod.dimension_figure()
+    mod.newton_step_figure()
+    for name in ['dimension.svg', 'newton-step.svg']:
+        assert (tmp_path / name).read_text() == (POST.parent / 'images' / name).read_text(), name

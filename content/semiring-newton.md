@@ -4,10 +4,10 @@ tags: semirings, grammars, parsing, algorithms, dynamic-programming
 status: draft
 
 <macros>
-\newcommand{\Chart}{\mathsf{chart}}
-\newcommand{\Change}{\mathsf{change}}
-\newcommand{\NextChart}{\mathsf{chart}'}
-\newcommand{\NextChange}{\mathsf{change}'}
+\newcommand{\Chart}{{\color{#4617ac}{\mathsf{chart}}}}
+\newcommand{\Change}{{\color{#CC6677}{\mathsf{change}}}}
+\newcommand{\NextChart}{{\color{#882255}{\mathsf{chart}'}}}
+\newcommand{\NextChange}{{\color{#b53389}{\mathsf{change}'}}}
 \newcommand{\Dim}[1]{\mathrm{dim}(#1)}
 \newcommand{\semione}{\mathbb{1}}
 \newcommand{\semizero}{\mathbb{0}}
@@ -63,7 +63,12 @@ Fixpoint iteration's error after $n$ iterations is about $2/n$; Newton's error a
 * If $m = 0$: $\Dim{t} \overset{\text{def}}{=} 0$.
 * If $m \ge 1$: let $d = \max(\Dim{t_1}, \ldots, \Dim{t_m})$.  If the argmax is unique (i.e., no ties for the max), $\Dim{t} \overset{\text{def}}{=} d$.  Otherwise, $\Dim{t} \overset{\text{def}}{=} d+1$.
 
-In words: a node's dimension goes up only where two children of maximal dimension meet; a chain of nodes with a single maximal child keeps the same dimension.<footnote>This is a variant of the Horton–Strahler number of a tree.  See [Esparza, Luttenberger, and Schlund (2014)](https://archive.model.in.tum.de/um/bibdb/esparza/lata2014.pdf) for a history of Strahler numbers and their connection to Newton's method.</footnote>
+In words: a node's dimension goes up only where two children of maximal dimension meet; a chain of nodes with a single maximal child keeps the same dimension.<footnote>This is a variant of the Horton–Strahler number of a tree.  See [Esparza, Luttenberger, and Schlund (2014)](https://archive.model.in.tum.de/um/bibdb/esparza/lata2014.pdf) for a history of Strahler numbers and their connection to Newton's method.</footnote>  The figure below illustrates the definition.
+
+<figure>
+<img src="../images/dimension.svg" alt="Three cases of the dimension of a derivation: a rule with no nonterminal children has dimension 0; a rule with two or more children of maximal dimension d has dimension d+1; a rule with a unique child of maximal dimension d has dimension d." style="width:100%">
+</figure>
+
 
 The dimension of a derivation is always $\le$ its height, but it is often $\ll$.  The set of derivations with dimension $d$ can be infinite.  In contrast, the set of derivations with fixed height is finite.  For example, every derivation of a linear grammar (at most one nonterminal per right-hand side), such as the geometric series `0.5: S → S a`, `1: S → b`, has dimension $0$.  What is remarkable about the set of derivations with dimension $= d\!+\!1$ is that there is an efficient *linear* structure relating it to the sets of derivations with dimensions $\le d$, $= d$, and $< d$.  This allows us to grow the set of derivations we have summed over much more quickly using a linear solver.
 
@@ -89,7 +94,13 @@ $$
 
 Here $\Chart[Y_{i:j}]$ is shorthand for the product $\Chart[Y_i] \otimes \cdots \otimes \Chart[Y_{j-1}]$, and terminals always have value $\semione$ in $\Chart$ and $\NextChart$ and $\semizero$ in $\Change$.  Then set $\Chart \gets \NextChart$, $\Change \gets \NextChange$, and repeat until $\Chart$ stops changing.
 
-**Why it works.**  On iteration $d$, $\Chart$ is the total weight of derivations of dimension $< d$, and $\Change$ is the total weight of derivations of dimension $= d$.  To see why, we argue that $\NextChange$ is precisely the sum of dimension $=d\!+\!1$ derivations.  According to the definition, to create a dimension $\ge d\!+\!1$ derivation, we need to combine at least two $=d$ derivations.  That is why the base case combines two $=d$ derivations (with $< d$ derivations to their right and $\le d$ derivations to their left); this creates a subderivation with dimension equal to $d\!+\!1$.  Now, because all subderivations that can combine along the spine (the path up to the root) of the new derivation have dimension $\le d$, the new derivation has dimension $d\!+\!1$; this is the recursive case.  To ensure that the enumeration of $= d\!+\!1$ derivations is exhaustive, the linearized grammar includes every rule that can combine the $\le d$ subderivations and the base case of at least two $= d$ subderivations.  The linearized grammar is a compact encoding of the value of this potentially infinite set of $=d\!+\!1$ derivations.  Finally, $\NextChart$ is the sum of $\Chart$ and $\Change$, so at iteration $d$, $\Chart$ is the total value of all derivations of dimension $< d$.
+**Why it works.**  On iteration $d$, $\Chart$ is the total weight of derivations of dimension $< d$, and $\Change$ is the total weight of derivations of dimension $= d$.  To see why, we argue that $\NextChange$ is precisely the sum of dimension $=d\!+\!1$ derivations.  Below, we illustrate how to build dimension $=d\!+\!1$ derivations inductively from the set of dimension $=d$ derivations, the set of dimension $\le d$ derivations, and the set of dimension $< d$ derivations.
+
+<figure>
+<img src="../images/newton-step.svg" alt="A dimension d+1 derivation: a shaded spine of rules, whose side subtrees have dimension at most d, ending in a rule that combines two subtrees of dimension exactly d with dimension less than d subtrees between and after them, and at most d before them." style="width:100%">
+</figure>
+
+  According to the definition, to create a dimension $\ge d\!+\!1$ derivation, we need to combine at least two $=d$ derivations.  That is why the base case combines two $=d$ derivations (with $< d$ derivations to their right and $\le d$ derivations to their left); this creates a subderivation with dimension equal to $d\!+\!1$.  Now, because all subderivations that can combine along the spine (the path up to the root) of the new derivation have dimension $\le d$, the new derivation has dimension $d\!+\!1$; this is the recursive case.  To ensure that the enumeration of $= d\!+\!1$ derivations is exhaustive, the linearized grammar includes every rule that can combine the $\le d$ subderivations and the base case of at least two $= d$ subderivations.  The linearized grammar is a compact encoding of the value of this potentially infinite set of $=d\!+\!1$ derivations.  Finally, $\NextChart$ is the sum of $\Chart$ and $\Change$, so at iteration $d$, $\Chart$ is the total value of all derivations of dimension $< d$.
 
 Notice that the recursive case contains a single unknown, $\NextChange[Y_k]$, and everything else is a constant from earlier iterations.  So each iteration of Newton's method solves a *linear* system, and every derivation of the original grammar is summed on the iteration equal to its dimension.  Over the reals, this is ordinary Newton's method: the coefficient of $\NextChange[Y_k]$ in the recursive case is the partial derivative $\partial f_X / \partial x_{Y_k}$ evaluated at $\NextChart$, and the base case equals $\boldsymbol{f}(\NextChart) \ominus \NextChart$.<footnote>The base case collects the derivations whose children all have dimension $\le d$ but which themselves have dimension $d\!+\!1$, which is exactly the part of $\boldsymbol{f}(\NextChart)$ not already in $\NextChart$.  The [tests](https://github.com/timvieira/semiring-newton/blob/master/tests/test_post.py) check that the iterates match textbook Newton's method on $x - f(x) = 0$ started from $x = 0$.</footnote>
 
