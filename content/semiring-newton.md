@@ -53,6 +53,18 @@ status: draft
 
 <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px 16px; margin-bottom: 1.5em; border-radius: 4px; font-size: 0.95em;"><p style="margin: 0;"><strong>Draft</strong> — This article is a work in progress. Content may change.</p></div>
 
+<div class="theorem" markdown="1">
+**In short.**  A weighted grammar's values are the least solution of a system of polynomial equations over a semiring.  This post sets up the problem and then builds three solvers, following chapter 5 of my dissertation:
+
+* [Grammars are algebraic systems](#grammars-are-algebraic-systems): the grammar problem and the algebraic problem are the same problem, and fixpoint iteration sums derivations by *height*.
+* [Newton's method](#newtons-method): sums derivations by *dimension*, so it can sum infinitely many derivations per iteration (one bit of precision per iteration where fixpoint iteration needs exponentially many).
+* [Specialized right-linear solver](#specialized-right-linear-solver): solves the linear subproblems exactly with the matrix star.
+* [Hybrid algorithm](#hybrid-algorithm): splits the grammar into strongly connected components and solves each one with the best method.
+* [Code](#code): a Python implementation for commutative semirings.
+
+Proofs, side examples, and background are tucked into collapsible blocks (▸) for readers who want more depth.
+</div>
+
 A weighted context-free grammar $\mathcal{G}$ assigns a semiring value $\sem{X} \in \Values$ to each nonterminal $X$: the total weight of all derivations $\deriv$ rooted at $X$,
 
 $$
@@ -90,6 +102,9 @@ Going from grammars to algebraic systems forgets nothing important: each rule be
 
 The fixpoint equations are *underspecified*: they provide necessary, but not sufficient, conditions for a solution to equal the potentially infinite sum over derivations.
 
+<details class="derivation" markdown="1">
+<summary>Example: a grammar whose equations have two solutions</summary>
+
 <div class="theorem" markdown="1">
 **Example.** The following grammar encodes the Catalan series: $\sem{X} = c + c^2 + 2\,c^3 + 5\,c^4 + 14\,c^5 + 42\,c^6 + \cdots$.
 
@@ -101,13 +116,20 @@ c: X → a
 Its algebraic system is $X = X \otimes X \oplus c$.  Over the real semiring, the system admits *two* solutions: rearranging gives $X^2 - X + c = 0$, so $X \in \frac{1 \pm \sqrt{1 - 4\,c}}{2}$ by the quadratic formula.  Assuming $0 \le c \le \frac{1}{4}$, the smaller solution $\frac{1 - \sqrt{1 - 4\,c}}{2}$ corresponds to the sum over derivations.  The larger solution $\frac{1 + \sqrt{1 - 4\,c}}{2}$ is a fixpoint, but it is not equal to the sum over derivations.
 </div>
 
+</details>
+
 The sum over derivations is the *least* solution.  In $\omega$-continuous semirings (where all the infinite sums we need are well-defined), Kleene's fixed-point theorem says that the least solution is the limit of the sequence $\boldsymbol{0}, \boldsymbol{f}(\boldsymbol{0}), \boldsymbol{f}(\boldsymbol{f}(\boldsymbol{0})), \ldots$.  Computing that sequence is **fixpoint iteration**, which initializes every nonterminal to $\semizero$ and repeatedly applies the equations above as an update until it converges.  Newton's method, too, is most naturally stated on the algebraic system: it is Newton's method for solving $\boldsymbol{X} = \boldsymbol{f}(\boldsymbol{X})$, retrofitted to semirings.  We stay with the grammar view below because it lets us talk about derivations directly.
 
 <div class="theorem" markdown="1">
 **Proposition.** The estimate at time $t$ given by fixpoint iteration equals the total value of all derivations of height $\le t$.
 </div>
 
-*Proof (sketch).* We start with every nonterminal at $\semizero$.  From there, we build height $\le 1$ derivations from the rules whose right-hand sides contain only terminals.  From there, each application of the update combines the values of height $\le t$ derivations by applying the rules of the grammar to derive the values of all height $\le t\!+\!1$ derivations.<footnote>This is a form of dynamic programming: the estimate at time $t$ is a memo table for a version of the computation, which makes the height $t$ an argument to break cycles.</footnote> $\square$
+<details class="derivation" markdown="1">
+<summary>Proof (sketch)</summary>
+
+We start with every nonterminal at $\semizero$.  From there, we build height $\le 1$ derivations from the rules whose right-hand sides contain only terminals.  From there, each application of the update combines the values of height $\le t$ derivations by applying the rules of the grammar to derive the values of all height $\le t\!+\!1$ derivations.<footnote>This is a form of dynamic programming: the estimate at time $t$ is a memo table for a version of the computation, which makes the height $t$ an argument to break cycles.</footnote> $\square$
+
+</details>
 
 Assuming the sum is convergent, fixpoint iteration will diligently compute it (up to each height) until every height has been covered; thus, it converges in the limit to $\sem{\cdot}$.  This post describes several algorithms for solving a weighted grammar's algebraic system, each of which works best under different conditions: an accelerated fixpoint iteration variant based on Newton's method for solving equations, a specialized solver for grammars with a certain linear structure, and a hybrid algorithm that breaks up a large grammar into smaller subgrammars that can be solved separately with the best applicable method.  It is adapted from chapter 5 of [my dissertation](https://timvieira.github.io/doc/2023-timv-dissertation.pdf), specialized here from Dyna programs to grammars; the [code](https://github.com/timvieira/semiring-newton) works for any commutative semiring.
 
@@ -203,16 +225,21 @@ We argue for the correctness of $\Newton$ in the following proposition.
 **Proposition.** On iteration $d$ of Algorithm 1, the value of $\Chart$ is the total value of derivations of dimension $\dLT$, and the value of $\Change$ is the total value of derivations of dimension $\dEQ$.
 </div>
 
-*Proof (sketch).* We first argue that the value $\NextChange$ returned by the call to $\NewtonStep$ is precisely the sum of dimension $\dPP$ derivations.  Below, we illustrate how to build dimension $\dPP$ derivations inductively from the set of dimension $\dEQ$ derivations, the set of dimension $\dLE$ derivations, and the set of $\dLT$ derivations.
-
 <figure>
 <img src="../images/newton-step.svg" alt="A dimension d+1 derivation: a shaded spine of rules, whose side subtrees have dimension at most d, ending in a rule that combines two subtrees of dimension exactly d with dimension less than d subtrees between and after them, and at most d before them." style="width:100%">
+<figcaption style="text-align: center; font-style: italic; font-size: 0.9em; margin: 0.4em 0 1.2em;">How Newton's method builds a dimension $\dPP$ derivation: the shaded spine holds the unknowns of the linearized grammar; the side subtrees are constants from earlier iterations.</figcaption>
 </figure>
+
+<details class="derivation" markdown="1">
+<summary>Proof (sketch)</summary>
+
+We first argue that the value $\NextChange$ returned by the call to $\NewtonStep$ is precisely the sum of dimension $\dPP$ derivations.  The figure above illustrates how to build dimension $\dPP$ derivations inductively from the set of dimension $\dEQ$ derivations, the set of dimension $\dLE$ derivations, and the set of $\dLT$ derivations.
 
 We argue that our scheme for creating new derivations generates derivations of dimension $\dPP$.  According to the definition of dimension, to create a dimension $\ge d\!+\!1$ derivation, we need to combine at least two $\dEQ$ derivations.  That is why the base case of $\NewtonStep$ combines at least two $\dEQ$ derivations; this is depicted as the rule connecting at least two adjacent $\dEQ$ derivations; this step creates a subderivation with dimension equal to ${\cPP d\!+\!1}$.  Now, because all subderivations that can combine along the spine (the path up to the root of the derivations) of the new derivation have dimension $\dLE$, the new derivation has dimension $\dPP$; we see this in the recursive case of $\NewtonStep$.  Thus, the dimension of the new derivation is precisely dimension $\dPP$.  To ensure that the enumeration of $\dPP$ is exhaustive, the grammar $\NextChange$ includes every rule that can combine the $\dLE$ subderivations and the base case of at least two $\dEQ$ subderivations.  The grammar $\NextChange$ is a compact encoding of the value of this potentially infinite set of $\dPP$ derivations.  Its solution is found by calling a specialized solver (described below) for grammars with linear rules.
 
 In $\NewtonStep$, we see that $\NextChart$ is the sum of $\Chart$ and $\Change$, and then $\NextChart$ overwrites $\Chart$.  Thus, at iteration $d$, $\Chart$ is the total value of all derivations with dimension $\dLT$. $\square$
 
+</details>
 
 ## Specialized right-linear solver
 
@@ -223,7 +250,12 @@ This section gives an algorithm that solves the special family of right-linear g
 0.5: X → a X
 ```
 
-Although this grammar has infinitely many derivations of $X$, we can solve for the total value of $X$ using grade school algebra: $\sem{X} = 1 + 0.5 \cdot \sem{X}$, so $\sem{X} = 2$.  Right-linearity can be checked syntactically: each rule has one of two possible forms (1) a right-hand side with only terminals, like the first rule, or (2) a right-hand side whose only nonterminal is its rightmost symbol, like the second rule.  A grammar can often be put into a right-linear form using simple grammar transformations.  The example below is not (immediately) right-linear.
+Although this grammar has infinitely many derivations of $X$, we can solve for the total value of $X$ using grade school algebra: $\sem{X} = 1 + 0.5 \cdot \sem{X}$, so $\sem{X} = 2$.  Right-linearity can be checked syntactically: each rule has one of two possible forms (1) a right-hand side with only terminals, like the first rule, or (2) a right-hand side whose only nonterminal is its rightmost symbol, like the second rule.  A grammar can often be put into a right-linear form using simple grammar transformations, but only if the semiring is commutative.
+
+<details class="derivation" markdown="1">
+<summary>Why commutativity matters: two more examples</summary>
+
+The example below is not (immediately) right-linear.
 
 ```text
 1:   X → b
@@ -240,6 +272,8 @@ S → ε
 
 Unlike the previous example, we cannot transform this grammar into a right-linear grammar because its semiring is not commutative.  Unfortunately, the right-linear algorithm cannot solve this grammar efficiently; we would need a general linear algorithm.
 
+</details>
+
 Algorithm 2 leverages a general-purpose algorithm for solving right-linear recurrences, i.e., equations of the form $\boldsymbol{x} = \boldsymbol{b} \oplus \boldsymbol{A}\, \boldsymbol{x}$ where $\boldsymbol{A} \in \Values^{N \times N}$, $\boldsymbol{b} \in \Values^{N}$.  The solution is found by the matrix star operation $\boldsymbol{x} = \kleene{\boldsymbol{A}}\, \boldsymbol{b}$.
 
 <details class="derivation" markdown="1">
@@ -255,6 +289,9 @@ $$
 where $\boldsymbol{\Delta} = \boldsymbol{E} + \boldsymbol{D}\, \kleene{\boldsymbol{B}}\, \boldsymbol{C}$.  It is straightforward to verify that each recursive call to $\kleene{(\cdot)}$ is decreasing in size; thus, the recursive definition is well-founded.  Furthermore, if the blocks are chosen to be equal in size, then the runtime is $\mathcal{O}(|N|^3)$.  (The code below uses Lehmann's equivalent one-pivot-at-a-time version.)
 </details>
 
+<details class="derivation" markdown="1">
+<summary>Background: algebraic path problems</summary>
+
 Special cases of this algorithm for specific applications are well-known, e.g.,
 
 * matrix inversion (Gauss–Jordan elimination)<footnote>[Althoen and McLaughlin (1987)](http://www.jstor.org/stable/2322413) provide an interesting historical overview of the Gauss–Jordan elimination algorithm.</footnote>
@@ -265,6 +302,8 @@ Special cases of this algorithm for specific applications are well-known, e.g.,
 These problems were unified into what is often called **algebraic path problems** ([Lehmann, 1977](https://doi.org/10.1016/0304-3975(77)90056-1); [Tarjan, 1981](https://doi.org/10.1145/322261.322272)).  Unifying these problems was just the (closed) semiring abstraction at work again!  A choice of semiring—with the same underlying algorithm that sums over all paths in a graph—solves all the above problems and many others.
 
 A useful perspective on the matrix star operation is that it computes the total weight of paths in a weighted directed graph.  Paths may be regarded as a restricted family of right-recursive derivations.<footnote>That is the interpretation used in Algorithm 2.  Similarly, Algorithm 1 uses this interpretation to sum over linearly recursive derivations.  Notice, however, that Algorithm 1 requires solutions to be linearly recursive.  To use the efficient right-recursive solver, we need the subgoals to be permutable (e.g., a commutative semiring).</footnote>  Suppose the matrix $\boldsymbol{A}$ is the weighted adjacency matrix of a graph.  Then $\boldsymbol{A}_{ik}$ is the total weight of all paths of length $=\!1$.  Similarly, the total weight of all paths between $i$ and $k$ of length $=\!2$ is $(\boldsymbol{A}\, \boldsymbol{A})_{ik}$.  Thus, the star operation on matrices $\kleene{\boldsymbol{A}} \overset{\text{def}}{=} \bigoplus_{i=0}^\infty \boldsymbol{A}^i$ computes the total weight of paths of length $0, 1, \ldots$ and adds them up.
+
+</details>
 
 <div class="pseudocode" markdown="1">
 **Algorithm 2** $\SolveLinearName$: Solve a right-linear grammar $\mathcal{G}$ by reduction to the matrix star operation
@@ -351,6 +390,9 @@ def _newton(self):
 
 The linearization builds the matrix $\boldsymbol{A}$ and vector $\boldsymbol{b}$.  The line `A[r.head, ys[k]] += ...` is where commutativity is used: the constant to the right of the unknown is folded into its coefficient.
 
+<details class="derivation" markdown="1">
+<summary>Show <code>linearize</code></summary>
+
 ```python
 def linearize(self, chart, change, next_chart, init=False):
     # Matrix and vector for linearized grammar
@@ -390,6 +432,8 @@ def linearize(self, chart, change, next_chart, init=False):
 
     return Change(self, A, b)
 ```
+
+</details>
 
 In the code, `chart`, `change`, and `next_chart` are $\Chart$, $\Change$, and $\NextChart$, and `Change` holds the linearized grammar whose solution is $\NextChange$.  During initialization, $\NextChart$ is zero on every nonterminal, so the matrix $\boldsymbol{A}$ only picks up rules with a single nonterminal, which matches $\NewtonInit$.  `Change.sol` computes $\kleene{\boldsymbol{A}} \boldsymbol{b}$.
 
