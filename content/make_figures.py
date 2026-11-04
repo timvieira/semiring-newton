@@ -194,9 +194,9 @@ def newton_step_figure():
     # annotation
     ax, ay = 420, 40
     lines = ['These are the unknowns that we are',
-             'solving for in <tspan font-family="sans-serif" fill="%s">change′</tspan>; the other' % NEXT_CHANGE,
+             'solving for in <tspan fill="%s">𝔡′</tspan>; the other' % NEXT_CHANGE,
              'subtrees are <tspan font-style="italic">constants</tspan> from previous',
-             'iterations (<tspan font-family="sans-serif" fill="%s">chart</tspan>, <tspan font-family="sans-serif" fill="%s">change</tspan>, <tspan font-family="sans-serif" fill="%s">chart′</tspan>).'
+             'iterations (<tspan fill="%s">𝔪</tspan>, <tspan fill="%s">𝔡</tspan>, <tspan fill="%s">𝔪′</tspan>).'
              % (CHART, CHANGE, NEXT_CHART)]
     for i, s in enumerate(lines):
         svg.text(ax, ay + 16*i, s, size=12, color=GRAY, anchor='start')

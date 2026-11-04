@@ -4,10 +4,10 @@ tags: semirings, grammars, parsing, algorithms, dynamic-programming
 status: draft
 
 <macros>
-\newcommand{\Chart}{{\color{#4617ac}{\mathsf{chart}}}}
-\newcommand{\Change}{{\color{#CC6677}{\mathsf{change}}}}
-\newcommand{\NextChart}{{\color{#882255}{\mathsf{chart}'}}}
-\newcommand{\NextChange}{{\color{#b53389}{\mathsf{change}'}}}
+\newcommand{\Chart}{{\color{#4617ac}{\mathfrak{m}}}}
+\newcommand{\Change}{{\color{#CC6677}{\mathfrak{d}}}}
+\newcommand{\NextChart}{{\color{#882255}{\mathfrak{m}'}}}
+\newcommand{\NextChange}{{\color{#b53389}{\mathfrak{d}'}}}
 \newcommand{\Dim}[1]{\mathrm{dim}(#1)}
 \newcommand{\semione}{\mathbb{1}}
 \newcommand{\semizero}{\mathbb{0}}
@@ -187,7 +187,7 @@ def linearize(self, chart, change, next_chart, init=False):
     return Change(self, A, b)
 ```
 
-During initialization, $\NextChart$ is zero on every nonterminal, so the matrix $\boldsymbol{A}$ only picks up rules with a single nonterminal, which matches the initialization above.  `Change.sol` computes $\boldsymbol{A}^* \boldsymbol{b}$.
+In the code, `chart`, `change`, and `next_chart` are $\Chart$, $\Change$, and $\NextChart$, and `Change` holds the linearized grammar whose solution is $\NextChange$.  During initialization, $\NextChart$ is zero on every nonterminal, so the matrix $\boldsymbol{A}$ only picks up rules with a single nonterminal, which matches the initialization above.  `Change.sol` computes $\boldsymbol{A}^* \boldsymbol{b}$.
 
 Using it:
 

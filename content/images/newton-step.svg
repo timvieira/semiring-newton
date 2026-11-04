@@ -81,8 +81,8 @@
 <circle cx="250.0" cy="182.0" r="4.5" fill="#333"/>
 <circle cx="250.0" cy="252.0" r="4.5" fill="#333"/>
 <text x="420.0" y="40.0" font-size="12" fill="#888" text-anchor="start">These are the unknowns that we are</text>
-<text x="420.0" y="56.0" font-size="12" fill="#888" text-anchor="start">solving for in <tspan font-family="sans-serif" fill="#b53389">change′</tspan>; the other</text>
+<text x="420.0" y="56.0" font-size="12" fill="#888" text-anchor="start">solving for in <tspan fill="#b53389">𝔡′</tspan>; the other</text>
 <text x="420.0" y="72.0" font-size="12" fill="#888" text-anchor="start">subtrees are <tspan font-style="italic">constants</tspan> from previous</text>
-<text x="420.0" y="88.0" font-size="12" fill="#888" text-anchor="start">iterations (<tspan font-family="sans-serif" fill="#4617ac">chart</tspan>, <tspan font-family="sans-serif" fill="#CC6677">change</tspan>, <tspan font-family="sans-serif" fill="#882255">chart′</tspan>).</text>
+<text x="420.0" y="88.0" font-size="12" fill="#888" text-anchor="start">iterations (<tspan fill="#4617ac">𝔪</tspan>, <tspan fill="#CC6677">𝔡</tspan>, <tspan fill="#882255">𝔪′</tspan>).</text>
 <path d="M 414 44 Q 360 20 270 18" fill="none" stroke="#888" stroke-width="1" marker-end="url(#arrow)"/>
 </svg>
