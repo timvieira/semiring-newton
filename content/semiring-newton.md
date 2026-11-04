@@ -108,10 +108,9 @@ The fixpoint equations are *underspecified*: they provide necessary, but not suf
 <div class="theorem" markdown="1">
 **Example.** The following grammar encodes the Catalan series: $\sem{X} = c + c^2 + 2\,c^3 + 5\,c^4 + 14\,c^5 + 42\,c^6 + \cdots$.
 
-```text
-1: X → X X
-c: X → a
-```
+$$
+\begin{aligned} X &\xrightarrow{1} X\,X \\ X &\xrightarrow{c} a \end{aligned}
+$$
 
 Its algebraic system is $X = X \otimes X \oplus c$.  Over the real semiring, the system admits *two* solutions: rearranging gives $X^2 - X + c = 0$, so $X \in \frac{1 \pm \sqrt{1 - 4\,c}}{2}$ by the quadratic formula.  Assuming $0 \le c \le \frac{1}{4}$, the smaller solution $\frac{1 - \sqrt{1 - 4\,c}}{2}$ corresponds to the sum over derivations.  The larger solution $\frac{1 + \sqrt{1 - 4\,c}}{2}$ is a fixpoint, but it is not equal to the sum over derivations.
 </div>
@@ -145,10 +144,9 @@ Our $\Newton$ method is an accelerated solver for fixpoint problems, based on [E
 <div class="theorem" markdown="1">
 **Example.** Consider the following grammar based on [Etessami and Yannakakis (2009, Theorem 3.2)](https://doi.org/10.1145/1462153.1462154).  This grammar has a single fixpoint $\sem{\mathrm{S}} = 1$.<footnote>$\frac{1}{2} x^2 - x + \frac{1}{2} = 0$, which, by the quadratic formula ($a\,x^2+b\,x+c=0 \iff x=\frac{-b\pm\sqrt{b^2-4\,a\,c}}{2a}$ with $a \mapsto \frac{1}{2}$, $b \mapsto -1$, $c \mapsto \frac{1}{2}$), has solutions $\{1\}$.</footnote>
 
-```text
-0.5: S → S S
-0.5: S → a
-```
+$$
+\begin{aligned} S &\xrightarrow{0.5} S\,S \\ S &\xrightarrow{0.5} a \end{aligned}
+$$
 
 Etessami and Yannakakis show that fixpoint iteration is exponentially slower than Newton's method in this example.  Specifically, fixpoint iteration requires roughly $2^k$ iterations to gain $k$ bits of precision, whereas Newton's method gains one bit of precision per iteration.  The plot below shows this using the code at the end of this post: the error of fixpoint iteration after $n$ iterations is about $2/n$, whereas the error of $\Newton$ after $n$ iterations is $2^{-n}$.
 </div>
@@ -171,11 +169,11 @@ Please refer to the figure below for an illustration.<footnote>This is a variant
 <figcaption style="text-align: center; font-style: italic; font-size: 0.9em; margin: 0.4em 0 1.2em;">Illustration of the dimension of a derivation.</figcaption>
 </figure>
 
-The dimension of a derivation is always $\le$ its height, but it is often $\ll$.  The set of derivations with dimension $d$ can be infinite.  In contrast, the set of derivations with fixed height is finite.  For example, each derivation in the geometric series grammar (`0.5: S → S a`, `1: S → b`) has dimension $0$.  What is remarkable about the set of derivations with dimension $\dPP$ is that there is an efficient *linear* structure relating it to the sets of derivations with dimensions $\dLE$, $\dEQ$, and $\dLT$.  This allows us to grow the set of derivations we have summed over much more quickly using a specialized linear solver (below).
+The dimension of a derivation is always $\le$ its height, but it is often $\ll$.  The set of derivations with dimension $d$ can be infinite.  In contrast, the set of derivations with fixed height is finite.  For example, each derivation in the geometric series grammar ($S \xrightarrow{0.5} S\,a$, $S \xrightarrow{1} b$) has dimension $0$.  What is remarkable about the set of derivations with dimension $\dPP$ is that there is an efficient *linear* structure relating it to the sets of derivations with dimensions $\dLE$, $\dEQ$, and $\dLT$.  This allows us to grow the set of derivations we have summed over much more quickly using a specialized linear solver (below).
 
 <figure>
 <img src="../images/height-dimension.svg" alt="Two derivations under the grammar S → S S, S → a, with each node labeled by its height and dimension. Left: a right-branching caterpillar of height 5 and dimension 1. Right: a balanced tree of height 3 and dimension 2." style="width:100%">
-<figcaption style="text-align: center; font-style: italic; font-size: 0.9em; margin: 0.4em 0 1.2em;">Height and dimension of two derivations under <code>S → S S</code>, <code>S → a</code>.  Fixpoint iteration sums the left derivation on iteration 5; Newton's method sums it on iteration 1 (the iteration equal to its dimension, counting the initialization as iteration 0).</figcaption>
+<figcaption style="text-align: center; font-style: italic; font-size: 0.9em; margin: 0.4em 0 1.2em;">Height and dimension of two derivations under $S \xrightarrow{0.5} S\,S$, $S \xrightarrow{0.5} a$.  Fixpoint iteration sums the left derivation on iteration 5; Newton's method sums it on iteration 1 (the iteration equal to its dimension, counting the initialization as iteration 0).</figcaption>
 </figure>
 
 <div class="pseudocode" markdown="1">
@@ -245,10 +243,9 @@ In $\NewtonStep$, we see that $\NextChart$ is the sum of $\Chart$ and $\Change$,
 
 This section gives an algorithm that solves the special family of right-linear grammars, such as those generated by Newton's method.<footnote>All algorithms in this section for the right-linear case work equally well for the left-linear case with straightforward modifications.</footnote>  Unlike fixpoint iteration and Newton's algorithm, this algorithm is exact: it can sum over the infinite set of right-linear derivations in closed form.  We can perform inference efficiently because the solution can be expressed in terms of finitely many regular operations.  A simple example of a right-linear grammar is
 
-```text
-1:   X → b
-0.5: X → a X
-```
+$$
+\begin{aligned} X &\xrightarrow{1} b \\ X &\xrightarrow{0.5} a\,X \end{aligned}
+$$
 
 Although this grammar has infinitely many derivations of $X$, we can solve for the total value of $X$ using grade school algebra: $\sem{X} = 1 + 0.5 \cdot \sem{X}$, so $\sem{X} = 2$.  Right-linearity can be checked syntactically: each rule has one of two possible forms (1) a right-hand side with only terminals, like the first rule, or (2) a right-hand side whose only nonterminal is its rightmost symbol, like the second rule.  A grammar can often be put into a right-linear form using simple grammar transformations, but only if the semiring is commutative.
 
@@ -257,18 +254,15 @@ Although this grammar has infinitely many derivations of $X$, we can solve for t
 
 The example below is not (immediately) right-linear.
 
-```text
-1:   X → b
-1:   X → X A
-0.5: A → a
-```
+$$
+\begin{aligned} X &\xrightarrow{1} b \\ X &\xrightarrow{1} X\,A \\ A &\xrightarrow{0.5} a \end{aligned}
+$$
 
 However, if we unfold the $A$ subgoal in the second rule and exploit the commutativity of multiplication (if permitted by the grammar's semiring) to reorder the right-hand side, then we arrive at the right-linear grammar from before.  Unfortunately, not all semirings are commutative; thus, permuting the right-hand side is not allowed.  The following example, using the semiring of formal languages, is linear but not right-linear.<footnote>The solution to this grammar is $\sem{S} = \{ a^n b^n \mid n \in \mathbb{N} \}$, which is not a regular language.  Thus, it cannot be expressed as a (finite) expression involving the operations $\otimes$, $\oplus$, and $\kleene{(\cdot)}$.</footnote>
 
-```text
-S → a S b
-S → ε
-```
+$$
+\begin{aligned} S &\xrightarrow{\semione} a\,S\,b \\ S &\xrightarrow{\semione} \varepsilon \end{aligned}
+$$
 
 Unlike the previous example, we cannot transform this grammar into a right-linear grammar because its semiring is not commutative.  Unfortunately, the right-linear algorithm cannot solve this grammar efficiently; we would need a general linear algorithm.
 
@@ -342,7 +336,7 @@ This post has provided several algorithms that each work best under different co
 2. $\Newton$: Because it converges more quickly than fixpoint iteration methods.  However, it requires that the induced linear subproblems can be solved efficiently.
 3. Fixpoint iteration: When all else fails, the subgrammar can be solved with fixpoint iteration (e.g., the agenda-based semi-naive algorithm), as it runs under the most general conditions.
 
-Algorithm 3 provides pseudocode for our hybrid algorithm, which solves each subgrammar in a topological order where the solutions to earlier subgrammars are taken as inputs to later subgrammars.  It makes use of a subroutine $\BestSolve$ that uses the ranking of solvers above to select the best strategy for solving the given subgrammar.<footnote>A simple implementation of $\BestSolve$ would use exception handling to move down the list of preferred solvers.  This can be sped up when the necessary properties can be checked ahead of any expensive computations.  For example, linearity can be checked by looking at the rules.</footnote>  Note that a rule may become linear once the components it depends on are solved: in the grammar of the code example below, `VP → VP PP` is linear in $\mathrm{VP}$ once $\mathrm{PP}$ is known, so $\mathrm{VP}$'s component is solved exactly by $\SolveLinearName$ even though the grammar as a whole is not linear.
+Algorithm 3 provides pseudocode for our hybrid algorithm, which solves each subgrammar in a topological order where the solutions to earlier subgrammars are taken as inputs to later subgrammars.  It makes use of a subroutine $\BestSolve$ that uses the ranking of solvers above to select the best strategy for solving the given subgrammar.<footnote>A simple implementation of $\BestSolve$ would use exception handling to move down the list of preferred solvers.  This can be sped up when the necessary properties can be checked ahead of any expensive computations.  For example, linearity can be checked by looking at the rules.</footnote>  Note that a rule may become linear once the components it depends on are solved: in the grammar of the code example below, $\mathrm{VP} \xrightarrow{0.3} \mathrm{VP}\;\mathrm{PP}$ is linear in $\mathrm{VP}$ once $\mathrm{PP}$ is known, so $\mathrm{VP}$'s component is solved exactly by $\SolveLinearName$ even though the grammar as a whole is not linear.
 
 <div class="pseudocode" markdown="1">
 **Algorithm 3** $\SolveName$: Solve grammar $\mathcal{G}$ using the hybrid algorithm
