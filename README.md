@@ -2,7 +2,7 @@ Solve fixpoint systems of equations over commutative semirings.
 
 ## Newton's Method
 
-<img src="docs/newton-convergence.png" align="right" width="200">
+<img src="docs/images/newton-convergence.png" align="right" width="200">
 
 This package implements a solver based on Newton's method for solving fixpoint systems of equations, suitably generalized beyond real numbers to operate over semirings! The papers below are excellent examples of why Newton's method is awesome for solving the kinds of cyclical systems of equations that we encounter in probabilistic inference problems and other domains. Our implementation assumes that the semiring is commutative.
 
@@ -21,4 +21,4 @@ This package implements a solver based on Newton's method for solving fixpoint s
 
 ## Blog post (draft)
 
-`content/semiring-newton.md` is a draft blog post explaining the algorithm for weighted grammars. Build it with the `blog` CLI from [timvieira/blog](https://github.com/timvieira/blog) (`blog build` or `blog dev`; output goes to `output/`). `tests/test_post.py` checks the claims the post makes.
+`content/semiring-newton.md` is a draft blog post explaining the algorithm for weighted grammars. Build it with the `blog` CLI from [timvieira/blog](https://github.com/timvieira/blog) (`blog build` or `blog dev`; output goes to `docs/`, which GitHub Pages serves). `tests/test_post.py` checks the claims the post makes.

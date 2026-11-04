@@ -1,6 +1,6 @@
 # Satellite blog post config, read by the `blog` CLI (blog.py in timvieira/blog).
-# Output goes to output/ (gitignored) so the build never touches docs/, which
-# holds the README's image.
+# Builds to docs/, which GitHub Pages serves.  docs/ is wiped on each build,
+# so images live in content/images/ (the README's image too).
 content = "content"
-output = "output"
+output = "docs"
 static = ["images"]
