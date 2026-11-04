@@ -27,6 +27,7 @@ status: draft
 \newcommand{\rrbracket}{]\!]}
 \newcommand{\sem}[1]{{\color{magenta}{\llbracket}}#1{\color{magenta}{\rrbracket}}}
 \newcommand{\deriv}{\boldsymbol{\delta}}
+\newcommand{\w}{{\color{magenta}{w}}}
 \newcommand{\Values}{{\color{magenta}{\mathbb{V}}}}
 \newcommand{\Series}{\Values\langle\!\langle \Sigma^* \rangle\!\rangle}
 \newcommand{\KleeneStar}{{\color{#332288}{\star}}}
@@ -66,16 +67,16 @@ status: draft
 Proofs, side examples, and background are tucked into collapsible blocks (▸) for readers who want more depth.
 </div>
 
-A weighted context-free grammar $\mathcal{G}$ over a semiring $\Values$ has nonterminals $\mathcal{N}$, terminals $\Sigma$, and a set of rules $X \xrightarrow{w} Y_1 \cdots Y_K$, each of which rewrites a nonterminal $X \in \mathcal{N}$ into a sequence of symbols $Y_1 \cdots Y_K \in (\mathcal{N} \cup \Sigma)^*$ with a weight $w \in \Values$.  The grammar assigns a value $\sem{X} \in \Values$ to each nonterminal $X$: the total weight of all derivations $\deriv$ rooted at $X$,
+A weighted context-free grammar $\mathcal{G}$ over a semiring $\Values$ has nonterminals $\mathcal{N}$, terminals $\Sigma$, and a set of rules $X \xrightarrow{\w} Y_1 \cdots Y_K$, each of which rewrites a nonterminal $X \in \mathcal{N}$ into a sequence of symbols $Y_1 \cdots Y_K \in (\mathcal{N} \cup \Sigma)^*$ with a weight $\w \in \Values$.  The grammar assigns a value $\sem{X} \in \Values$ to each nonterminal $X$: the total weight of all derivations $\deriv$ rooted at $X$,
 
 $$
-\sem{X} = \bigoplus_{\deriv \in \mathcal{D}(X)} w(\deriv),
+\sem{X} = \bigoplus_{\deriv \in \mathcal{D}(X)} \w(\deriv),
 $$
 
-where the weight $w(\deriv)$ of a derivation is the $\otimes$-product of the weights of the rules it uses.  When the grammar is recursive, $\mathcal{D}(X)$ is infinite, and $\sem{\cdot}$ is the least solution to the system of fixpoint equations
+where the weight $\w(\deriv)$ of a derivation is the $\otimes$-product of the weights of the rules it uses.  When the grammar is recursive, $\mathcal{D}(X)$ is infinite, and $\sem{\cdot}$ is the least solution to the system of fixpoint equations
 
 $$
-\sem{X} = \bigoplus_{(X \xrightarrow{w} Y_1 \cdots Y_K) \in \mathcal{G}} w \otimes \sem{Y_1} \otimes \cdots \otimes \sem{Y_K},
+\sem{X} = \bigoplus_{(X \xrightarrow{\w} Y_1 \cdots Y_K) \in \mathcal{G}} \w \otimes \sem{Y_1} \otimes \cdots \otimes \sem{Y_K},
 $$
 
 with $\sem{a} = \semione$ for each terminal $a \in \Sigma$.  Note that $\sem{X}$ ignores *which strings* the derivations yield: it sums the weights of all derivations, whatever their yield.  This total weight (sometimes called the treesum or, for a PCFG, the partition function) is the quantity the algorithms below compute.
@@ -92,14 +93,14 @@ $$
 where each component $f_X$ is a polynomial.  The grammar problem and the algebraic problem are essentially the same problem, but we have to be careful about *which* semiring $\mathbb{S}$ the system lives in, because there are two natural choices.  They differ in what happens to the terminals:
 
 * **Weights only, $\mathbb{S} = \Values$.**  Each terminal is replaced by $\semione$, so it drops out of the monomial.  The least solution is the total weight $\sem{X}$ defined above.
-* **Weighted languages, $\mathbb{S} = \Series$.**  Here $\Series$ is the semiring of *weighted languages* (formal power series), i.e., functions $L : \Sigma^* \to \Values$, with $\oplus$ taken pointwise and $\otimes$ given by concatenation, $(L \otimes L')(s) = \bigoplus_{s = u\,v} L(u) \otimes L'(v)$.  A rule weight $w$ becomes the series that gives the empty string weight $w$, and a terminal $a$ becomes the series that gives the one-symbol string $a$ weight $\semione$.  The least solution $L_X$ assigns each string $s$ the total weight of the derivations of $X$ that yield $s$.
+* **Weighted languages, $\mathbb{S} = \Series$.**  Here $\Series$ is the semiring of *weighted languages* (formal power series), i.e., functions $L : \Sigma^* \to \Values$, with $\oplus$ taken pointwise and $\otimes$ given by concatenation, $(L \otimes L')(s) = \bigoplus_{s = u\,v} L(u) \otimes L'(v)$.  A rule weight $\w$ becomes the series that gives the empty string weight $\w$, and a terminal $a$ becomes the series that gives the one-symbol string $a$ weight $\semione$.  The least solution $L_X$ assigns each string $s$ the total weight of the derivations of $X$ that yield $s$.
 
 | grammar | system over $\Values$ (weights only) | system over $\Series$ (weighted languages) |
 |:--------|:-------------------------------------|:-------------------------------------------|
 | nonterminal $X$ | variable $X$ | variable $X$ |
 | terminal $a$ | $\semione$ (drops out) | the series $a$ (string $a$ with weight $\semione$) |
-| rule $X \xrightarrow{w} Y_1 \cdots Y_K$ | monomial $w \otimes \mathop{\bigcirc}_{Y_k \in \mathcal{N}} Y_k$ in $f_X$ | monomial $w\, Y_1 \cdots Y_K$ in $f_X$, in order |
-| derivation $\deriv$ with yield $s$ | the term $w(\deriv)$ | the term $w(\deriv)\, s$ |
+| rule $X \xrightarrow{\w} Y_1 \cdots Y_K$ | monomial $\w \otimes \mathop{\bigcirc}_{Y_k \in \mathcal{N}} Y_k$ in $f_X$ | monomial $\w\, Y_1 \cdots Y_K$ in $f_X$, in order |
+| derivation $\deriv$ with yield $s$ | the term $\w(\deriv)$ | the term $\w(\deriv)\, s$ |
 | least solution, $X$ component | $\sem{X} \in \Values$ | $L_X \in \Series$ |
 
 The two are related by forgetting the strings: $\sem{X} = \bigoplus_{s \in \Sigma^*} L_X(s)$, i.e., the image of $L_X$ under the homomorphism that sends every terminal to $\semione$.  When $\Values$ is the boolean semiring, a weighted language is just a formal language, $L_X$ is the language generated by $X$, and the least-solution characterization is the observation of Chomsky and Schützenberger.
@@ -162,7 +163,7 @@ Etessami and Yannakakis show that fixpoint iteration is exponentially slower tha
 </figure>
 
 <div class="theorem" markdown="1">
-**Definition.** The **dimension** $\Dim{\deriv}$ of a derivation $\deriv$ is defined inductively.  Suppose $\deriv$ is rooted at a rule $X \xrightarrow{w} Y_1 \cdots Y_K$, and let $\deriv_1, \ldots, \deriv_m$ be its subderivations for the *nonterminal* children (terminal children are ignored).
+**Definition.** The **dimension** $\Dim{\deriv}$ of a derivation $\deriv$ is defined inductively.  Suppose $\deriv$ is rooted at a rule $X \xrightarrow{\w} Y_1 \cdots Y_K$, and let $\deriv_1, \ldots, \deriv_m$ be its subderivations for the *nonterminal* children (terminal children are ignored).
 
 * If $m = 0$: $\Dim{\deriv} \overset{\text{def}}{=} 0$.
 * If $m \ge 1$: Let $d = \max(\Dim{\deriv_1}, \ldots, \Dim{\deriv_m})$.  If the argmax is unique (i.e., no ties for the max), $\Dim{\deriv} \overset{\text{def}}{=} d$.  Otherwise, $\Dim{\deriv} \overset{\text{def}}{=} d+1$.
@@ -197,21 +198,21 @@ $$
 &\textbf{def } \NewtonStep(\mathcal{G}, \Chart, \Change): \\
 &\quad \NextChart \gets \Chart \doplus \Change \\
 &\quad \NextChange \gets \NewGrammar \\
-&\quad \textbf{for } (X \xrightarrow{w} Y_1 \cdots Y_K) \in \mathcal{G}: \\
+&\quad \textbf{for } (X \xrightarrow{\w} Y_1 \cdots Y_K) \in \mathcal{G}: \\
 &\quad\quad \Comment{\text{Base case: combine at least two derivations with dimension } \dEQ} \\
 &\quad\quad \textbf{for } 1 \le i \lt j \le K: \\
-&\quad\quad\quad \NextChange[X] \dopluseq w \dotimes \NextChart[Y_{[:i)}] \dotimes \Change[Y_i] \dotimes \Chart[Y_{(i:j)}] \dotimes \Change[Y_j] \dotimes \Chart[Y_{(j:]}] \\
+&\quad\quad\quad \NextChange[X] \dopluseq \w \dotimes \NextChart[Y_{[:i)}] \dotimes \Change[Y_i] \dotimes \Chart[Y_{(i:j)}] \dotimes \Change[Y_j] \dotimes \Chart[Y_{(j:]}] \\
 &\quad\quad \Comment{\text{Recursive case: derive } \dPP \text{ derivations by combining}} \\
 &\quad\quad \phantom{\triangleright}\ \color{grey}{\text{one } \dPP \text{ derivation with } \dLE \text{ derivations}} \\
 &\quad\quad \textbf{for } k \in [1{:}K] \textbf{ where } Y_k \text{ is a nonterminal}: \\
-&\quad\quad\quad \NextChange[X] \dopluseq w \dotimes \NextChart[Y_{[:k)}] \dotimes Y_k \dotimes \NextChart[Y_{(k:]}] \\
+&\quad\quad\quad \NextChange[X] \dopluseq \w \dotimes \NextChart[Y_{[:k)}] \dotimes Y_k \dotimes \NextChart[Y_{(k:]}] \\
 &\quad \textbf{return } \langle \NextChart, \solveLinear{\NextChange} \rangle \quad \Comment{\text{Solve using the specialized linear solver (below)}} \\[8pt]
 &\textbf{def } \NewtonInit(\mathcal{G}): \\
 &\quad \Comment{\text{Initial set of new derivations}} \\
 &\quad \Chart \gets \NewGrammar;\ \NextChange \gets \NewGrammar \\
-&\quad \textbf{for } (X \xrightarrow{w} Y_1 \cdots Y_K) \in \mathcal{G} \\
+&\quad \textbf{for } (X \xrightarrow{\w} Y_1 \cdots Y_K) \in \mathcal{G} \\
 &\quad\quad\quad \textbf{where } \text{at most } 1 \text{ of } Y_1, \ldots, Y_K \text{ is a nonterminal}: \\
-&\quad\quad \NextChange[X] \dopluseq w \dotimes Y_1 \dotimesdots Y_K \\
+&\quad\quad \NextChange[X] \dopluseq \w \dotimes Y_1 \dotimesdots Y_K \\
 &\quad \textbf{return } \langle \Chart, \solveLinear{\NextChange} \rangle \quad \Comment{\text{Solve using the specialized linear solver (below)}}
 \end{aligned}
 $$
@@ -314,11 +315,11 @@ $$
 &\quad N \gets \text{the nonterminals of } \mathcal{G} \\
 &\quad \boldsymbol{A} \gets \semizero^{N \times N};\ \boldsymbol{b} \gets \semizero^{N} \\
 &\quad \Comment{\text{Assemble the matrix } \boldsymbol{A} \text{ and vector } \boldsymbol{b} \text{ for the right-linear solver}} \\
-&\quad \textbf{for } (X \xrightarrow{w} Y_1 \cdots Y_K) \in \mathcal{G}: \\
+&\quad \textbf{for } (X \xrightarrow{\w} Y_1 \cdots Y_K) \in \mathcal{G}: \\
 &\quad\quad \textbf{if } Y_1 \cdots Y_K \text{ are all terminals}: \\
-&\quad\quad\quad \boldsymbol{b}_{X} \mathrel{\oplus}= w \\
+&\quad\quad\quad \boldsymbol{b}_{X} \mathrel{\oplus}= \w \\
 &\quad\quad \textbf{elif } Y_1 \cdots Y_K = a_1 \cdots a_{K-1}\, Y \text{ where } a_1, \ldots, a_{K-1} \text{ are terminals}: \\
-&\quad\quad\quad \boldsymbol{A}_{X, Y} \mathrel{\oplus}= w \\
+&\quad\quad\quad \boldsymbol{A}_{X, Y} \mathrel{\oplus}= \w \\
 &\quad\quad \textbf{else}: \\
 &\quad\quad\quad \textbf{raise } \text{Error}(\text{“grammar is not right linear”}) \\
 &\quad \Comment{\text{Solve the right-linear system with the matrix star operation}} \\
@@ -354,9 +355,9 @@ $$
 &\quad \textbf{for } \sigma \in \SccName(\mathcal{G}): \quad \Comment{\text{Topologically ordered list of SCCs}} \\
 &\quad\quad \Comment{\text{Restrict } \mathcal{G} \text{ to the nonterminals in the current component, } \sigma} \\
 &\quad\quad \mathcal{G}' \gets \NewGrammar \\
-&\quad\quad \textbf{for } (X \xrightarrow{w} Y_1 \cdots Y_K) \in \mathcal{G} \textbf{ where } X \in \sigma: \\
+&\quad\quad \textbf{for } (X \xrightarrow{\w} Y_1 \cdots Y_K) \in \mathcal{G} \textbf{ where } X \in \sigma: \\
 &\quad\quad\quad \Comment{\text{Fold symbols outside } \sigma \text{ (already solved) into the weight}} \\
-&\quad\quad\quad \mathcal{G}'[X] \dopluseq \big(w \dotimes \dbigotimes_{Y_k \notin \sigma} \Chart[Y_k]\big) \dotimes \dbigotimes_{Y_k \in \sigma} Y_k \\
+&\quad\quad\quad \mathcal{G}'[X] \dopluseq \big(\w \dotimes \dbigotimes_{Y_k \notin \sigma} \Chart[Y_k]\big) \dotimes \dbigotimes_{Y_k \in \sigma} Y_k \\
 &\quad\quad \Comment{\text{Solve the subgrammar with the best applicable method}} \\
 &\quad\quad \Chart \gets \Chart \oplus \BestSolve(\mathcal{G}') \\
 &\quad \textbf{return } \Chart

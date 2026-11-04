@@ -37,7 +37,7 @@
         inlineMath: [['$', '$']],
         displayMath: [['$$', '$$']],
         processEscapes: true,
-        macros: {"BestSolve": "{\\color{#332288}{\\mathsf{best\\_solve}}}", "Change": "{\\color{#CC6677}{\\mathfrak{d}}}", "Chart": "{\\color{#4617ac}{\\mathfrak{m}}}", "Comment": "\\color{grey}{\\triangleright}\\ \\color{grey}", "Dim": ["\\DimName(#1)", 1], "DimName": "{\\color{#332288}{\\mathsf{dim}}}", "HeightName": "{\\color{#332288}{\\mathsf{height}}}", "KleeneStar": "{\\color{#332288}{\\star}}", "NewGrammar": "\\{\\,\\}", "Newton": "{\\color{#332288}{\\mathsf{newton}}}", "NewtonInit": "{\\color{#332288}{\\mathsf{newton\\_init}}}", "NewtonStep": "{\\color{#332288}{\\mathsf{newton\\_step}}}", "NextChange": "{\\color{#b53389}{\\mathfrak{d}\u0027}}", "NextChart": "{\\color{#882255}{\\mathfrak{m}\u0027}}", "Notation": "\\color{#332288}", "SccName": "{\\color{#332288}{\\mathsf{scc}}}", "Series": "\\Values\\langle\\!\\langle \\Sigma^* \\rangle\\!\\rangle", "SolveLinearName": "{\\color{#332288}{\\mathsf{solve\\_linear}}}", "SolveName": "{\\color{#332288}{\\mathsf{solve}}}", "Values": "{\\color{magenta}{\\mathbb{V}}}", "cPP": "\\color{#b53389}", "dEQ": "{\\color{#CC6677}{=\\!d}}", "dLE": "{\\color{#882255}{\\le\\!d}}", "dLT": "{\\color{#4617ac}{\\lt\\!d}}", "dPP": "{\\color{#b53389}{=\\!d\\!+\\!1}}", "dbigotimes": "\\mathop{\\color[rgb]{0,0,.5}{\\bigcirc}}", "deriv": "\\boldsymbol{\\delta}", "doplus": "\\mathbin{\\color[rgb]{0,0,.5}{\\oplus}}", "dopluseq": "\\mathrel{\\color[rgb]{0,0,.5}{\\oplus\\mkern-2mu\\texttt{=}}}", "dotimes": "\\mathbin{\\color[rgb]{0,0,.5}{\\circ}}", "dotimesdots": "\\dotimes{\\color[rgb]{0,0,.5}{\\cdots}}\\dotimes", "kleene": ["#1^{\\KleeneStar}", 1], "llbracket": "[\\![", "otimes": "\\mathbin{\\circ}", "rrbracket": "]\\!]", "sem": ["{\\color{magenta}{\\llbracket}}#1{\\color{magenta}{\\rrbracket}}", 1], "semione": "{\\color{magenta}{\\underline{1}}}", "semizero": "{\\color{magenta}{\\underline{0}}}", "solveLinear": ["\\SolveLinearName(#1)", 1]},
+        macros: {"BestSolve": "{\\color{#332288}{\\mathsf{best\\_solve}}}", "Change": "{\\color{#CC6677}{\\mathfrak{d}}}", "Chart": "{\\color{#4617ac}{\\mathfrak{m}}}", "Comment": "\\color{grey}{\\triangleright}\\ \\color{grey}", "Dim": ["\\DimName(#1)", 1], "DimName": "{\\color{#332288}{\\mathsf{dim}}}", "HeightName": "{\\color{#332288}{\\mathsf{height}}}", "KleeneStar": "{\\color{#332288}{\\star}}", "NewGrammar": "\\{\\,\\}", "Newton": "{\\color{#332288}{\\mathsf{newton}}}", "NewtonInit": "{\\color{#332288}{\\mathsf{newton\\_init}}}", "NewtonStep": "{\\color{#332288}{\\mathsf{newton\\_step}}}", "NextChange": "{\\color{#b53389}{\\mathfrak{d}\u0027}}", "NextChart": "{\\color{#882255}{\\mathfrak{m}\u0027}}", "Notation": "\\color{#332288}", "SccName": "{\\color{#332288}{\\mathsf{scc}}}", "Series": "\\Values\\langle\\!\\langle \\Sigma^* \\rangle\\!\\rangle", "SolveLinearName": "{\\color{#332288}{\\mathsf{solve\\_linear}}}", "SolveName": "{\\color{#332288}{\\mathsf{solve}}}", "Values": "{\\color{magenta}{\\mathbb{V}}}", "cPP": "\\color{#b53389}", "dEQ": "{\\color{#CC6677}{=\\!d}}", "dLE": "{\\color{#882255}{\\le\\!d}}", "dLT": "{\\color{#4617ac}{\\lt\\!d}}", "dPP": "{\\color{#b53389}{=\\!d\\!+\\!1}}", "dbigotimes": "\\mathop{\\color[rgb]{0,0,.5}{\\bigcirc}}", "deriv": "\\boldsymbol{\\delta}", "doplus": "\\mathbin{\\color[rgb]{0,0,.5}{\\oplus}}", "dopluseq": "\\mathrel{\\color[rgb]{0,0,.5}{\\oplus\\mkern-2mu\\texttt{=}}}", "dotimes": "\\mathbin{\\color[rgb]{0,0,.5}{\\circ}}", "dotimesdots": "\\dotimes{\\color[rgb]{0,0,.5}{\\cdots}}\\dotimes", "kleene": ["#1^{\\KleeneStar}", 1], "llbracket": "[\\![", "otimes": "\\mathbin{\\circ}", "rrbracket": "]\\!]", "sem": ["{\\color{magenta}{\\llbracket}}#1{\\color{magenta}{\\rrbracket}}", 1], "semione": "{\\color{magenta}{\\underline{1}}}", "semizero": "{\\color{magenta}{\\underline{0}}}", "solveLinear": ["\\SolveLinearName(#1)", 1], "w": "{\\color{magenta}{w}}"},
       },
       chtml: {
         scale: 1,
@@ -100,13 +100,13 @@
 </ul>
 <p>Proofs, side examples, and background are tucked into collapsible blocks (▸) for readers who want more depth.</p>
 </div>
-<p>A weighted context-free grammar $\mathcal{G}$ over a semiring $\Values$ has nonterminals $\mathcal{N}$, terminals $\Sigma$, and a set of rules $X \xrightarrow{w} Y_1 \cdots Y_K$, each of which rewrites a nonterminal $X \in \mathcal{N}$ into a sequence of symbols $Y_1 \cdots Y_K \in (\mathcal{N} \cup \Sigma)^*$ with a weight $w \in \Values$.  The grammar assigns a value $\sem{X} \in \Values$ to each nonterminal $X$: the total weight of all derivations $\deriv$ rooted at $X$,</p>
+<p>A weighted context-free grammar $\mathcal{G}$ over a semiring $\Values$ has nonterminals $\mathcal{N}$, terminals $\Sigma$, and a set of rules $X \xrightarrow{\w} Y_1 \cdots Y_K$, each of which rewrites a nonterminal $X \in \mathcal{N}$ into a sequence of symbols $Y_1 \cdots Y_K \in (\mathcal{N} \cup \Sigma)^*$ with a weight $\w \in \Values$.  The grammar assigns a value $\sem{X} \in \Values$ to each nonterminal $X$: the total weight of all derivations $\deriv$ rooted at $X$,</p>
 <p>$$
-\sem{X} = \bigoplus_{\deriv \in \mathcal{D}(X)} w(\deriv),
+\sem{X} = \bigoplus_{\deriv \in \mathcal{D}(X)} \w(\deriv),
 $$</p>
-<p>where the weight $w(\deriv)$ of a derivation is the $\otimes$-product of the weights of the rules it uses.  When the grammar is recursive, $\mathcal{D}(X)$ is infinite, and $\sem{\cdot}$ is the least solution to the system of fixpoint equations</p>
+<p>where the weight $\w(\deriv)$ of a derivation is the $\otimes$-product of the weights of the rules it uses.  When the grammar is recursive, $\mathcal{D}(X)$ is infinite, and $\sem{\cdot}$ is the least solution to the system of fixpoint equations</p>
 <p>$$
-\sem{X} = \bigoplus_{(X \xrightarrow{w} Y_1 \cdots Y_K) \in \mathcal{G}} w \otimes \sem{Y_1} \otimes \cdots \otimes \sem{Y_K},
+\sem{X} = \bigoplus_{(X \xrightarrow{\w} Y_1 \cdots Y_K) \in \mathcal{G}} \w \otimes \sem{Y_1} \otimes \cdots \otimes \sem{Y_K},
 $$</p>
 <p>with $\sem{a} = \semione$ for each terminal $a \in \Sigma$.  Note that $\sem{X}$ ignores <em>which strings</em> the derivations yield: it sums the weights of all derivations, whatever their yield.  This total weight (sometimes called the treesum or, for a PCFG, the partition function) is the quantity the algorithms below compute.</p>
 <h2 id="grammars-are-algebraic-systems">Grammars are algebraic systems</h2>
@@ -117,7 +117,7 @@ $$</p>
 <p>where each component $f_X$ is a polynomial.  The grammar problem and the algebraic problem are essentially the same problem, but we have to be careful about <em>which</em> semiring $\mathbb{S}$ the system lives in, because there are two natural choices.  They differ in what happens to the terminals:</p>
 <ul>
 <li><strong>Weights only, $\mathbb{S} = \Values$.</strong>  Each terminal is replaced by $\semione$, so it drops out of the monomial.  The least solution is the total weight $\sem{X}$ defined above.</li>
-<li><strong>Weighted languages, $\mathbb{S} = \Series$.</strong>  Here $\Series$ is the semiring of <em>weighted languages</em> (formal power series), i.e., functions $L : \Sigma^* \to \Values$, with $\oplus$ taken pointwise and $\otimes$ given by concatenation, $(L \otimes L')(s) = \bigoplus_{s = u\,v} L(u) \otimes L'(v)$.  A rule weight $w$ becomes the series that gives the empty string weight $w$, and a terminal $a$ becomes the series that gives the one-symbol string $a$ weight $\semione$.  The least solution $L_X$ assigns each string $s$ the total weight of the derivations of $X$ that yield $s$.</li>
+<li><strong>Weighted languages, $\mathbb{S} = \Series$.</strong>  Here $\Series$ is the semiring of <em>weighted languages</em> (formal power series), i.e., functions $L : \Sigma^* \to \Values$, with $\oplus$ taken pointwise and $\otimes$ given by concatenation, $(L \otimes L')(s) = \bigoplus_{s = u\,v} L(u) \otimes L'(v)$.  A rule weight $\w$ becomes the series that gives the empty string weight $\w$, and a terminal $a$ becomes the series that gives the one-symbol string $a$ weight $\semione$.  The least solution $L_X$ assigns each string $s$ the total weight of the derivations of $X$ that yield $s$.</li>
 </ul>
 <table>
 <thead>
@@ -139,14 +139,14 @@ $$</p>
 <td style="text-align: left;">the series $a$ (string $a$ with weight $\semione$)</td>
 </tr>
 <tr>
-<td style="text-align: left;">rule $X \xrightarrow{w} Y_1 \cdots Y_K$</td>
-<td style="text-align: left;">monomial $w \otimes \mathop{\bigcirc}_{Y_k \in \mathcal{N}} Y_k$ in $f_X$</td>
-<td style="text-align: left;">monomial $w\, Y_1 \cdots Y_K$ in $f_X$, in order</td>
+<td style="text-align: left;">rule $X \xrightarrow{\w} Y_1 \cdots Y_K$</td>
+<td style="text-align: left;">monomial $\w \otimes \mathop{\bigcirc}_{Y_k \in \mathcal{N}} Y_k$ in $f_X$</td>
+<td style="text-align: left;">monomial $\w\, Y_1 \cdots Y_K$ in $f_X$, in order</td>
 </tr>
 <tr>
 <td style="text-align: left;">derivation $\deriv$ with yield $s$</td>
-<td style="text-align: left;">the term $w(\deriv)$</td>
-<td style="text-align: left;">the term $w(\deriv)\, s$</td>
+<td style="text-align: left;">the term $\w(\deriv)$</td>
+<td style="text-align: left;">the term $\w(\deriv)\, s$</td>
 </tr>
 <tr>
 <td style="text-align: left;">least solution, $X$ component</td>
@@ -195,7 +195,7 @@ $$</p>
 </figure>
 
 <div class="theorem">
-<p><strong>Definition.</strong> The <strong>dimension</strong> $\Dim{\deriv}$ of a derivation $\deriv$ is defined inductively.  Suppose $\deriv$ is rooted at a rule $X \xrightarrow{w} Y_1 \cdots Y_K$, and let $\deriv_1, \ldots, \deriv_m$ be its subderivations for the <em>nonterminal</em> children (terminal children are ignored).</p>
+<p><strong>Definition.</strong> The <strong>dimension</strong> $\Dim{\deriv}$ of a derivation $\deriv$ is defined inductively.  Suppose $\deriv$ is rooted at a rule $X \xrightarrow{\w} Y_1 \cdots Y_K$, and let $\deriv_1, \ldots, \deriv_m$ be its subderivations for the <em>nonterminal</em> children (terminal children are ignored).</p>
 <ul>
 <li>If $m = 0$: $\Dim{\deriv} \overset{\text{def}}{=} 0$.</li>
 <li>If $m \ge 1$: Let $d = \max(\Dim{\deriv_1}, \ldots, \Dim{\deriv_m})$.  If the argmax is unique (i.e., no ties for the max), $\Dim{\deriv} \overset{\text{def}}{=} d$.  Otherwise, $\Dim{\deriv} \overset{\text{def}}{=} d+1$.</li>
@@ -229,21 +229,21 @@ $$</p>
 &\textbf{def } \NewtonStep(\mathcal{G}, \Chart, \Change): \\
 &\quad \NextChart \gets \Chart \doplus \Change \\
 &\quad \NextChange \gets \NewGrammar \\
-&\quad \textbf{for } (X \xrightarrow{w} Y_1 \cdots Y_K) \in \mathcal{G}: \\
+&\quad \textbf{for } (X \xrightarrow{\w} Y_1 \cdots Y_K) \in \mathcal{G}: \\
 &\quad\quad \Comment{\text{Base case: combine at least two derivations with dimension } \dEQ} \\
 &\quad\quad \textbf{for } 1 \le i \lt j \le K: \\
-&\quad\quad\quad \NextChange[X] \dopluseq w \dotimes \NextChart[Y_{[:i)}] \dotimes \Change[Y_i] \dotimes \Chart[Y_{(i:j)}] \dotimes \Change[Y_j] \dotimes \Chart[Y_{(j:]}] \\
+&\quad\quad\quad \NextChange[X] \dopluseq \w \dotimes \NextChart[Y_{[:i)}] \dotimes \Change[Y_i] \dotimes \Chart[Y_{(i:j)}] \dotimes \Change[Y_j] \dotimes \Chart[Y_{(j:]}] \\
 &\quad\quad \Comment{\text{Recursive case: derive } \dPP \text{ derivations by combining}} \\
 &\quad\quad \phantom{\triangleright}\ \color{grey}{\text{one } \dPP \text{ derivation with } \dLE \text{ derivations}} \\
 &\quad\quad \textbf{for } k \in [1{:}K] \textbf{ where } Y_k \text{ is a nonterminal}: \\
-&\quad\quad\quad \NextChange[X] \dopluseq w \dotimes \NextChart[Y_{[:k)}] \dotimes Y_k \dotimes \NextChart[Y_{(k:]}] \\
+&\quad\quad\quad \NextChange[X] \dopluseq \w \dotimes \NextChart[Y_{[:k)}] \dotimes Y_k \dotimes \NextChart[Y_{(k:]}] \\
 &\quad \textbf{return } \langle \NextChart, \solveLinear{\NextChange} \rangle \quad \Comment{\text{Solve using the specialized linear solver (below)}} \\[8pt]
 &\textbf{def } \NewtonInit(\mathcal{G}): \\
 &\quad \Comment{\text{Initial set of new derivations}} \\
 &\quad \Chart \gets \NewGrammar;\ \NextChange \gets \NewGrammar \\
-&\quad \textbf{for } (X \xrightarrow{w} Y_1 \cdots Y_K) \in \mathcal{G} \\
+&\quad \textbf{for } (X \xrightarrow{\w} Y_1 \cdots Y_K) \in \mathcal{G} \\
 &\quad\quad\quad \textbf{where } \text{at most } 1 \text{ of } Y_1, \ldots, Y_K \text{ is a nonterminal}: \\
-&\quad\quad \NextChange[X] \dopluseq w \dotimes Y_1 \dotimesdots Y_K \\
+&\quad\quad \NextChange[X] \dopluseq \w \dotimes Y_1 \dotimesdots Y_K \\
 &\quad \textbf{return } \langle \Chart, \solveLinear{\NextChange} \rangle \quad \Comment{\text{Solve using the specialized linear solver (below)}}
 \end{aligned}
 $$</p>
@@ -319,11 +319,11 @@ $$</p>
 &\quad N \gets \text{the nonterminals of } \mathcal{G} \\
 &\quad \boldsymbol{A} \gets \semizero^{N \times N};\ \boldsymbol{b} \gets \semizero^{N} \\
 &\quad \Comment{\text{Assemble the matrix } \boldsymbol{A} \text{ and vector } \boldsymbol{b} \text{ for the right-linear solver}} \\
-&\quad \textbf{for } (X \xrightarrow{w} Y_1 \cdots Y_K) \in \mathcal{G}: \\
+&\quad \textbf{for } (X \xrightarrow{\w} Y_1 \cdots Y_K) \in \mathcal{G}: \\
 &\quad\quad \textbf{if } Y_1 \cdots Y_K \text{ are all terminals}: \\
-&\quad\quad\quad \boldsymbol{b}_{X} \mathrel{\oplus}= w \\
+&\quad\quad\quad \boldsymbol{b}_{X} \mathrel{\oplus}= \w \\
 &\quad\quad \textbf{elif } Y_1 \cdots Y_K = a_1 \cdots a_{K-1}\, Y \text{ where } a_1, \ldots, a_{K-1} \text{ are terminals}: \\
-&\quad\quad\quad \boldsymbol{A}_{X, Y} \mathrel{\oplus}= w \\
+&\quad\quad\quad \boldsymbol{A}_{X, Y} \mathrel{\oplus}= \w \\
 &\quad\quad \textbf{else}: \\
 &\quad\quad\quad \textbf{raise } \text{Error}(\text{“grammar is not right linear”}) \\
 &\quad \Comment{\text{Solve the right-linear system with the matrix star operation}} \\
@@ -353,9 +353,9 @@ $$</p>
 &\quad \textbf{for } \sigma \in \SccName(\mathcal{G}): \quad \Comment{\text{Topologically ordered list of SCCs}} \\
 &\quad\quad \Comment{\text{Restrict } \mathcal{G} \text{ to the nonterminals in the current component, } \sigma} \\
 &\quad\quad \mathcal{G}' \gets \NewGrammar \\
-&\quad\quad \textbf{for } (X \xrightarrow{w} Y_1 \cdots Y_K) \in \mathcal{G} \textbf{ where } X \in \sigma: \\
+&\quad\quad \textbf{for } (X \xrightarrow{\w} Y_1 \cdots Y_K) \in \mathcal{G} \textbf{ where } X \in \sigma: \\
 &\quad\quad\quad \Comment{\text{Fold symbols outside } \sigma \text{ (already solved) into the weight}} \\
-&\quad\quad\quad \mathcal{G}'[X] \dopluseq \big(w \dotimes \dbigotimes_{Y_k \notin \sigma} \Chart[Y_k]\big) \dotimes \dbigotimes_{Y_k \in \sigma} Y_k \\
+&\quad\quad\quad \mathcal{G}'[X] \dopluseq \big(\w \dotimes \dbigotimes_{Y_k \notin \sigma} \Chart[Y_k]\big) \dotimes \dbigotimes_{Y_k \in \sigma} Y_k \\
 &\quad\quad \Comment{\text{Solve the subgrammar with the best applicable method}} \\
 &\quad\quad \Chart \gets \Chart \oplus \BestSolve(\mathcal{G}') \\
 &\quad \textbf{return } \Chart
