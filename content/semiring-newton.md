@@ -13,6 +13,8 @@ status: draft
 \newcommand{\semizero}{\mathbb{0}}
 </macros>
 
+<div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px 16px; margin-bottom: 1.5em; border-radius: 4px; font-size: 0.95em;"><p style="margin: 0;"><strong>Draft</strong> — This article is a work in progress. Content may change.</p></div>
+
 A weighted context-free grammar (WCFG) assigns a semiring value to each nonterminal: the total weight $\beta(X)$ of all derivations rooted at $X$,
 
 $$
