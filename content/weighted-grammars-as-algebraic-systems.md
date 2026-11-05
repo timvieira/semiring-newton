@@ -64,7 +64,7 @@ status: draft
 2. [Solving Linear Grammars Exactly](../solving-linear-grammars-exactly/): an exact solver for (right-)linear grammars via the matrix star
 3. [Newton's Method for Weighted Grammars](../newtons-method-for-weighted-grammars/): Newton's method, a hybrid solver that splits the grammar into strongly connected components, and code
 
-Background: [semirings](/blog/semirings-a-powerful-abstraction-for-dynamic-programming/).  Proofs, side examples, and background are tucked into collapsible blocks (▸) for readers who want more depth.
+Background: [semirings](/blog/semirings-a-powerful-abstraction-for-dynamic-programming/).  Sequel: [from weighted grammars to Dyna programs](/blog/from-weighted-grammars-to-dyna-programs/).  Proofs, side examples, and background are tucked into collapsible blocks (▸) for readers who want more depth.
 </div>
 
 A weighted context-free grammar $\mathcal{G}$ over a semiring $\Values$ has nonterminals $\mathcal{N}$, terminals $\Sigma$, and a set of rules $X \xrightarrow{\w} Y_1 \cdots Y_K$, each of which rewrites a nonterminal $X \in \mathcal{N}$ into a sequence of symbols $Y_1 \cdots Y_K \in (\mathcal{N} \cup \Sigma)^*$ with a weight $\w \in \Values$.  The grammar assigns a value $\sem{X} \in \Values$ to each nonterminal $X$: the total weight of all derivations $\deriv$ rooted at $X$,

@@ -96,7 +96,7 @@
 <li><a href="../solving-linear-grammars-exactly/">Solving Linear Grammars Exactly</a>: an exact solver for (right-)linear grammars via the matrix star</li>
 <li><a href="../newtons-method-for-weighted-grammars/">Newton's Method for Weighted Grammars</a>: Newton's method, a hybrid solver that splits the grammar into strongly connected components, and code</li>
 </ol>
-<p>Background: <a href="/blog/semirings-a-powerful-abstraction-for-dynamic-programming/">semirings</a>.  Proofs, side examples, and background are tucked into collapsible blocks (▸) for readers who want more depth.</p>
+<p>Background: <a href="/blog/semirings-a-powerful-abstraction-for-dynamic-programming/">semirings</a>.  Sequel: <a href="/blog/from-weighted-grammars-to-dyna-programs/">from weighted grammars to Dyna programs</a>.  Proofs, side examples, and background are tucked into collapsible blocks (▸) for readers who want more depth.</p>
 </div>
 <p>A weighted context-free grammar $\mathcal{G}$ over a semiring $\Values$ has nonterminals $\mathcal{N}$, terminals $\Sigma$, and a set of rules $X \xrightarrow{\w} Y_1 \cdots Y_K$, each of which rewrites a nonterminal $X \in \mathcal{N}$ into a sequence of symbols $Y_1 \cdots Y_K \in (\mathcal{N} \cup \Sigma)^*$ with a weight $\w \in \Values$.  The grammar assigns a value $\sem{X} \in \Values$ to each nonterminal $X$: the total weight of all derivations $\deriv$ rooted at $X$,</p>
 <p>$$
