@@ -23,10 +23,13 @@ This package implements a solver based on Newton's method for solving fixpoint s
 
 ## Blog posts (draft series)
 
-`content/` holds a three-part draft series, adapted from chapter 5 of the dissertation:
+`content/` holds a draft series, adapted from chapter 5 of the dissertation (with background from the dissertation and from the left-corner paper, arXiv 2311.16258), served by GitHub Pages from `docs/`:
 
+- Background: `semirings-a-powerful-abstraction-for-dynamic-programming.md`
+- Background: `weighted-context-free-grammars.md` (figures: `content/wcfg_figures.py`)
 1. `weighted-grammars-as-algebraic-systems.md`: the problem, and why fixpoint iteration can be slow
 2. `solving-linear-grammars-exactly.md`: the right-linear solver (matrix star)
 3. `newtons-method-for-weighted-grammars.md`: Newton's method, the hybrid SCC solver, and code
+- Sequel: `from-weighted-grammars-to-dyna-programs.md` (embeds cells from `content/dyna-tutorial.ipynb`, a copy of dyna-pi's `docs/Demo.ipynb`)
 
-Build them with the `blog` CLI from [timvieira/blog](https://github.com/timvieira/blog) (`blog build` or `blog dev`; output goes to `docs/`, which GitHub Pages serves).  `content/make_figures.py` draws the figures, and `tests/test_post.py` checks the claims the posts make.
+Build them with the `blog` CLI from [timvieira/blog](https://github.com/timvieira/blog) (`blog build` or `blog dev`; output goes to `docs/`).  `content/make_figures.py` draws the series figures, and `tests/test_post.py` checks the claims the posts make.
