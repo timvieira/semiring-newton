@@ -64,7 +64,7 @@ status: draft
 2. [Solving Linear Grammars Exactly](../solving-linear-grammars-exactly/): an exact solver for (right-)linear grammars via the matrix star
 3. **Newton's Method for Weighted Grammars**: Newton's method, a hybrid solver that splits the grammar into strongly connected components, and code
 
-Background: [semirings](/blog/semirings-a-powerful-abstraction-for-dynamic-programming/).  Sequel: [from weighted grammars to Dyna programs](/blog/from-weighted-grammars-to-dyna-programs/).  Proofs, side examples, and background are tucked into collapsible blocks (▸) for readers who want more depth.
+Background: [semirings](/blog/semirings-a-powerful-abstraction-for-dynamic-programming/) and [weighted context-free grammars](/blog/weighted-context-free-grammars/).  Sequel: [from weighted grammars to Dyna programs](/blog/from-weighted-grammars-to-dyna-programs/).  Proofs, side examples, and background are tucked into collapsible blocks (▸) for readers who want more depth.
 </div>
 
 <img src="../images/newton-convergence.png" class="right" alt="Portrait of Isaac Newton" style="width: 160px;">
