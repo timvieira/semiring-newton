@@ -71,7 +71,7 @@ beta(J) max= beta(I) * w(I,J).
 ```
 </div>
 
-What is interesting about the connection between these two programs is that we kept the same recurrence, but we have changed the aggregate quantity that we seek to compute.  Both programs define the same set of derivations, which we can interpret as paths in the graph.  How these paths are weighted and interpreted differs: this is the separation of concerns that [semirings](../semirings-a-powerful-abstraction-for-dynamic-programming/) provide.
+What is interesting about the connection between these two programs is that we kept the same recurrence, but we have changed the aggregate quantity that we seek to compute.  Both programs define the same set of derivations, which we can interpret as paths in the graph.  How these paths are weighted and interpreted differs: this is the separation of concerns that [semirings](https://timvieira.github.io/semirings/) provide.
 
 Next, we give a fundamental algorithm in NLP.
 
@@ -141,7 +141,7 @@ Here is the CKY program from above, written for `dyna-pi`.  The last two lines d
 
 ### Semirings
 
-The same program can be evaluated in different [semirings](../semirings-a-powerful-abstraction-for-dynamic-programming/) without changing its rules.
+The same program can be evaluated in different [semirings](https://timvieira.github.io/semirings/) without changing its rules.
 
 {% notebook dyna-tutorial.ipynb cells[129:141] %}
 

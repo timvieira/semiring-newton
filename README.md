@@ -25,7 +25,7 @@ This package implements a solver based on Newton's method for solving fixpoint s
 
 `content/` holds a draft series, adapted from chapter 5 of the dissertation (with background from the dissertation and from the left-corner paper, arXiv 2311.16258), served by GitHub Pages from `docs/`:
 
-- Background: `semirings-a-powerful-abstraction-for-dynamic-programming.md`
+- Background: semirings, at the `semirings` library's documentation page (https://timvieira.github.io/semirings/), whose examples run as tests
 - Background: `weighted-context-free-grammars.md` (figures: `content/wcfg_figures.py`)
 1. `weighted-grammars-as-algebraic-systems.md`: the problem, and why fixpoint iteration can be slow
 2. `solving-linear-grammars-exactly.md`: the right-linear solver (matrix star)

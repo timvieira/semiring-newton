@@ -65,7 +65,7 @@ We highlight a few commutative semirings and their use cases:
 * nonnegative real $\langle \mathbb{R}_{\geq 0} \cup \{\infty\}, +, \cdot, 0, 1 \rangle$: the total probability of a string,
 * Viterbi $\langle [0,1], \max, \cdot, 0, 1 \rangle$: the weight of the most likely derivation of a string.
 
-For further reading on semirings in NLP, we recommend [Goodman (1999)](https://aclanthology.org/J99-4004) and [Huang (2008)](https://aclanthology.org/C08-5001), as well as my [semirings](../semirings-a-powerful-abstraction-for-dynamic-programming/) post.
+For further reading on semirings in NLP, we recommend [Goodman (1999)](https://aclanthology.org/J99-4004) and [Huang (2008)](https://aclanthology.org/C08-5001), as well as my [semirings](https://timvieira.github.io/semirings/) post.
 
 
 ## Weighted context-free grammars
