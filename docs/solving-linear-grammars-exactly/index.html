@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+<head>
+  <meta charset="utf-8">
+  
+  <title>Solving Linear Grammars Exactly &mdash; Graduate Descent</title>
+  
+
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&display=swap"
+        rel="stylesheet">
+
+  <meta name="author" content="Tim Vieira">
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link href="../favicon.png" rel="icon">
+  <link rel="alternate" type="application/atom+xml" title="Graduate Descent Atom Feed" href="../atom.xml">
+  <link rel="stylesheet" href="../pygments.css">
+
+  <link rel="stylesheet" href="/blog/css/blog.css">
+
+  <!-- MathJax 3 -->
+  <script>
+    window.MathJax = {
+      startup: {
+        typeset: false,    // We typeset manually after all widgets have built their DOM
+        ready: function() {
+          MathJax.startup.defaultReady();
+          MathJax.startup.promise.then(function() {
+            // Typeset the full page once MathJax is ready
+            MathJax.typesetPromise();
+          });
+        }
+      },
+      tex: {
+        inlineMath: [['$', '$']],
+        displayMath: [['$$', '$$']],
+        processEscapes: true,
+        macros: {"AddRule": "\\textbf{add } ", "BestSolve": "{\\color{#332288}{\\mathsf{best\\_solve}}}", "Change": "{\\color{#CC6677}{\\mathfrak{d}}}", "Chart": "{\\color{#4617ac}{\\mathfrak{m}}}", "Comment": "\\color{grey}{\\triangleright}\\ \\color{grey}", "Dim": ["\\DimName(#1)", 1], "DimName": "{\\color{#332288}{\\mathsf{dim}}}", "HeightName": "{\\color{#332288}{\\mathsf{height}}}", "KleeneStar": "{\\color{#332288}{\\star}}", "NewGrammar": "\\{\\,\\}", "Newton": "{\\color{#332288}{\\mathsf{newton}}}", "NewtonInit": "{\\color{#332288}{\\mathsf{newton\\_init}}}", "NewtonStep": "{\\color{#332288}{\\mathsf{newton\\_step}}}", "NextChange": "{\\color{#b53389}{\\mathfrak{d}\u0027}}", "NextChart": "{\\color{#882255}{\\mathfrak{m}\u0027}}", "Notation": "\\color{#332288}", "SccName": "{\\color{#332288}{\\mathsf{scc}}}", "Series": "\\Values\\langle\\!\\langle \\Sigma^* \\rangle\\!\\rangle", "SolveLinearName": "{\\color{#332288}{\\mathsf{solve\\_linear}}}", "SolveName": "{\\color{#332288}{\\mathsf{solve}}}", "Values": "{\\color{magenta}{\\mathbb{V}}}", "cPP": "\\color{#b53389}", "dEQ": "{\\color{#CC6677}{=\\!d}}", "dLE": "{\\color{#882255}{\\le\\!d}}", "dLT": "{\\color{#4617ac}{\\lt\\!d}}", "dPP": "{\\color{#b53389}{=\\!d\\!+\\!1}}", "deriv": "\\boldsymbol{\\delta}", "doplus": "\\mathbin{\\color[rgb]{0,0,.5}{\\oplus}}", "dopluseq": "\\mathrel{\\color[rgb]{0,0,.5}{\\oplus\\mkern-2mu\\texttt{=}}}", "dotimes": "\\mathbin{\\color[rgb]{0,0,.5}{\\circ}}", "dotimesdots": "\\dotimes{\\color[rgb]{0,0,.5}{\\cdots}}\\dotimes", "kleene": ["#1^{\\KleeneStar}", 1], "llbracket": "[\\![", "otimes": "\\mathbin{\\circ}", "rrbracket": "]\\!]", "sem": ["{\\color{magenta}{\\llbracket}}#1{\\color{magenta}{\\rrbracket}}", 1], "semione": "{\\color{magenta}{\\underline{1}}}", "semizero": "{\\color{magenta}{\\underline{0}}}", "solveLinear": ["\\SolveLinearName(#1)", 1], "val": "{\\color{magenta}{v}}", "w": "{\\color{magenta}{w}}"},
+      },
+      chtml: {
+        scale: 1,
+      },
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+
+<body>
+  <header role="banner"><hgroup>
+    <h1><a href="https://timvieira.github.io/blog/">Graduate Descent</a></h1>
+    <nav role="navigation">
+      <a href="https://timvieira.github.io/">About</a>
+      <a href="https://timvieira.github.io/blog/">Archive</a>
+    </nav>
+  </hgroup></header>
+  <div id="main">
+    <div id="content">
+
+
+
+<div>
+  <article class="hentry" role="article">
+    <header>
+      <h1 class="entry-title" style="view-transition-name: title-solving-linear-grammars-exactly">Solving Linear Grammars Exactly</h1>
+      <p class="meta">
+        <time datetime="2026-11-04T00:00:00" pubdate>Nov 04, 2026</time>
+        <span class="byline author vcard">
+          by <span class="fn">Tim Vieira</span>
+        </span>
+        
+        <br>
+        <span class="tags">
+          <a class="tag" href="../index.html#tag=semirings">semirings</a> <a class="tag" href="../index.html#tag=grammars">grammars</a> <a class="tag" href="../index.html#tag=algorithms">algorithms</a> <a class="tag" href="../index.html#tag=dynamic-programming">dynamic-programming</a> <a class="tag" href="../index.html#tag=linear-algebra">linear-algebra</a>
+        </span>
+        
+      </p>
+    </header>
+    <div class="entry-content" style="view-transition-name: article-body">
+      <style>
+.theorem { border-left: 3px solid #c9c2b8; padding: 0.6em 1em; margin: 1.2em 0; background: #fbf8f3; }
+.theorem > :first-child { margin-top: 0; }
+.theorem > :last-child { margin-bottom: 0; }
+.pseudocode mjx-container[display="true"] { text-align: left !important; margin-left: 0.5em !important; font-size: 90% !important; overflow-x: auto; overflow-y: hidden; }
+</style>
+
+<div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px 16px; margin-bottom: 1.5em; border-radius: 4px; font-size: 0.95em;">
+<p style="margin: 0;"><strong>Draft</strong> — This article is a work in progress. Content may change.
+</p></div>
+
+<div class="theorem">
+<p><strong>Solving weighted grammars</strong> is a three-part series adapted from chapter 5 of <a href="https://timvieira.github.io/doc/2023-timv-dissertation.pdf">my dissertation</a>.  This is part 2.</p>
+<ol>
+<li><a href="../weighted-grammars-as-algebraic-systems/">Weighted Grammars as Algebraic Systems</a>: the problem, and why fixpoint iteration can be slow</li>
+<li><strong>Solving Linear Grammars Exactly</strong>: an exact solver for (right-)linear grammars via the matrix star</li>
+<li><a href="../newtons-method-for-weighted-grammars/">Newton's Method for Weighted Grammars</a>: Newton's method, a hybrid solver that splits the grammar into strongly connected components, and code</li>
+</ol>
+<p>Background: <a href="/blog/semirings-a-powerful-abstraction-for-dynamic-programming/">semirings</a>.  Proofs, side examples, and background are tucked into collapsible blocks (▸) for readers who want more depth.</p>
+</div>
+<p>Recall the setup from <a href="../weighted-grammars-as-algebraic-systems/">part 1</a>: a weighted context-free grammar $\mathcal{G}$ over a semiring $\Values$ has rules $X \xrightarrow{\w} Y_1 \cdots Y_K$ with weights $\w \in \Values$, and the value $\sem{X}$ of a nonterminal $X$ is the total weight of its derivations, which is the least solution of the fixpoint equations</p>
+<p>$$
+\sem{X} = \bigoplus_{(X \xrightarrow{\w} Y_1 \cdots Y_K) \in \mathcal{G}} \w \otimes \sem{Y_1} \otimes \cdots \otimes \sem{Y_K},
+$$</p>
+<p>with $\sem{a} = \semione$ for each terminal $a$.  As in the rest of the series, the semiring product ⊗ is drawn as $\circ$, semiring values are magenta, and we assume a commutative semiring.</p>
+<h2 id="right-linear-grammars">Right-linear grammars</h2>
+<p>This section gives an algorithm that solves the special family of right-linear grammars, such as those generated by Newton's method in <a href="../newtons-method-for-weighted-grammars/">part 3</a>.<label class="sidenote-number"></label><span class="margin-note">All algorithms in this section for the right-linear case work equally well for the left-linear case with straightforward modifications.</span>  Unlike fixpoint iteration and Newton's algorithm, this algorithm is exact: it can sum over the infinite set of right-linear derivations in closed form.  We can perform inference efficiently because the solution can be expressed in terms of finitely many regular operations.  A simple example of a right-linear grammar is</p>
+<p>$$
+\begin{aligned} X &\xrightarrow{1} b \\ X &\xrightarrow{0.5} a\,X \end{aligned}
+$$</p>
+<p>Although this grammar has infinitely many derivations of $X$, we can solve for the total value of $X$ using grade school algebra: $\sem{X} = 1 + 0.5 \cdot \sem{X}$, so $\sem{X} = 2$.  Right-linearity can be checked syntactically: each rule has one of two possible forms (1) a right-hand side with only terminals, like the first rule, or (2) a right-hand side whose only nonterminal is its rightmost symbol, like the second rule.  A grammar can often be put into a right-linear form using simple grammar transformations, but only if the semiring is commutative.</p>
+<details class="derivation">
+<summary>Why commutativity matters: two more examples
+</summary>
+<p>The example below is not (immediately) right-linear.</p>
+<p>$$
+\begin{aligned} X &\xrightarrow{1} b \\ X &\xrightarrow{1} X\,A \\ A &\xrightarrow{0.5} a \end{aligned}
+$$</p>
+<p>However, if we unfold the $A$ subgoal in the second rule and exploit the commutativity of multiplication (if permitted by the grammar's semiring) to reorder the right-hand side, then we arrive at the right-linear grammar from before.  (In the weights-only system, the terminal $a$ contributes $\semione$, so moving it is harmless.)  Unfortunately, not all semirings are commutative; thus, permuting the right-hand side is not allowed.  In particular, the weighted-language semiring $\Series$ is never commutative.  The following example, solved for its language (i.e., in $\Series$ with boolean weights, the semiring of formal languages), is linear but not right-linear.<label class="sidenote-number"></label><span class="margin-note">The solution to this grammar is the language $L_S = \{ a^n b^n \mid n \in \mathbb{N} \}$, which is not a regular language.  Thus, it cannot be expressed as a (finite) expression involving the operations $\otimes$, $\oplus$, and $\kleene{(\cdot)}$.</span></p>
+<p>$$
+\begin{aligned} S &\xrightarrow{\semione} a\,S\,b \\ S &\xrightarrow{\semione} \varepsilon \end{aligned}
+$$</p>
+<p>Unlike the previous example, we cannot transform this grammar into a right-linear grammar because its semiring is not commutative.  (Its weights-only system, $\sem{S} = \sem{S} \oplus \semione$, is easy; it is the language that is hard.)  Unfortunately, the right-linear algorithm cannot solve this grammar efficiently; we would need a general linear algorithm.</p>
+</details>
+<p>Algorithm 1 leverages a general-purpose algorithm for solving right-linear recurrences, i.e., equations of the form $\boldsymbol{x} = \boldsymbol{b} \oplus \boldsymbol{A}\, \boldsymbol{x}$ where $\boldsymbol{A} \in \Values^{N \times N}$, $\boldsymbol{b} \in \Values^{N}$.  The solution is found by the matrix star operation $\boldsymbol{x} = \kleene{\boldsymbol{A}}\, \boldsymbol{b}$.</p>
+<details class="derivation">
+<summary>Computing the matrix star
+</summary>
+<p>Matrices over a semiring form a semiring (<a href="https://doi.org/10.1016/0304-3975(77)90056-1">Lehmann, 1977</a>): the matrix addition and multiplication operations are a straightforward generalization of the usual ones on $\mathbb{R}$, $[\boldsymbol{A} + \boldsymbol{B}]_{ij} = \boldsymbol{A}_{ij} \oplus \boldsymbol{B}_{ij}$ and $[\boldsymbol{A}\, \boldsymbol{B}]_{ik} = \bigoplus_{j} \boldsymbol{A}_{ij} \otimes \boldsymbol{B}_{jk}$.  The star operation $\kleene{\boldsymbol{A}}$ can be computed as follows.  If $\boldsymbol{A}$ is $1 \times 1$, then $\kleene{[a]} = [\kleene{a}]$.  Otherwise, we can decompose $\boldsymbol{A}$ into nontrivial blocks $\langle \boldsymbol{B}, \boldsymbol{C}, \boldsymbol{D}, \boldsymbol{E} \rangle$ and apply the following blockwise recursion,</p>
+<p>$$
+\kleene{\begin{bmatrix} \boldsymbol{B} & \boldsymbol{C} \\ \boldsymbol{D} & \boldsymbol{E} \end{bmatrix}}
+= \begin{bmatrix} \kleene{\boldsymbol{B}} + \kleene{\boldsymbol{B}}\, \boldsymbol{C}\, \kleene{\boldsymbol{\Delta}}\, \boldsymbol{D}\, \kleene{\boldsymbol{B}} & \kleene{\boldsymbol{B}}\, \boldsymbol{C}\, \kleene{\boldsymbol{\Delta}} \\ \kleene{\boldsymbol{\Delta}}\, \boldsymbol{D}\, \kleene{\boldsymbol{B}} & \kleene{\boldsymbol{\Delta}} \end{bmatrix}
+$$</p>
+<p>where $\boldsymbol{\Delta} = \boldsymbol{E} + \boldsymbol{D}\, \kleene{\boldsymbol{B}}\, \boldsymbol{C}$.  It is straightforward to verify that each recursive call to $\kleene{(\cdot)}$ is decreasing in size; thus, the recursive definition is well-founded.  Furthermore, if the blocks are chosen to be equal in size, then the runtime is $\mathcal{O}(|N|^3)$.  (The code below uses Lehmann's equivalent one-pivot-at-a-time version.)  See also the <a href="/blog/semirings-a-powerful-abstraction-for-dynamic-programming/">semirings</a> post.</p>
+</details>
+<details class="derivation">
+<summary>Background: algebraic path problems
+</summary>
+<p>Special cases of this algorithm for specific applications are well-known, e.g.,</p>
+<ul>
+<li>matrix inversion (Gauss–Jordan elimination)<label class="sidenote-number"></label><span class="margin-note"><a href="http://www.jstor.org/stable/2322413">Althoen and McLaughlin (1987)</a> provide an interesting historical overview of the Gauss–Jordan elimination algorithm.</span></li>
+<li>all-pairs shortest path (<a href="https://doi.org/10.1145/367766.368168">Floyd, 1962</a>; <a href="https://doi.org/10.1145/321105.321107">Warshall, 1962</a>; <a href="https://gallica.bnf.fr/ark:/12148/bpt6k3201c/f222.image">Roy, 1959</a>)</li>
+<li>finite-state automaton to regular expressions conversion (<a href="https://apps.dtic.mil/sti/pdfs/ADA596138.pdf">Kleene, 1956</a>)</li>
+<li>transitive closure (<a href="https://doi.org/10.1145/321105.321107">Warshall, 1962</a>)</li>
+</ul>
+<p>These problems were unified into what is often called <strong>algebraic path problems</strong> (<a href="https://doi.org/10.1016/0304-3975(77)90056-1">Lehmann, 1977</a>; <a href="https://doi.org/10.1145/322261.322272">Tarjan, 1981</a>).  Unifying these problems was just the (closed) semiring abstraction at work again!  A choice of semiring—with the same underlying algorithm that sums over all paths in a graph—solves all the above problems and many others.</p>
+<p>A useful perspective on the matrix star operation is that it computes the total weight of paths in a weighted directed graph.  Paths may be regarded as a restricted family of right-recursive derivations.<label class="sidenote-number"></label><span class="margin-note">That is the interpretation used in Algorithm 1.  Similarly, Newton's method (<a href="../newtons-method-for-weighted-grammars/">part 3</a>) uses this interpretation to sum over linearly recursive derivations.  Notice, however, that Newton's method requires solutions to be linearly recursive.  To use the efficient right-recursive solver, we need the subgoals to be permutable (e.g., a commutative semiring).</span>  Suppose the matrix $\boldsymbol{A}$ is the weighted adjacency matrix of a graph.  Then $\boldsymbol{A}_{ik}$ is the total weight of all paths of length $=\!1$.  Similarly, the total weight of all paths between $i$ and $k$ of length $=\!2$ is $(\boldsymbol{A}\, \boldsymbol{A})_{ik}$.  Thus, the star operation on matrices $\kleene{\boldsymbol{A}} \overset{\text{def}}{=} \bigoplus_{i=0}^\infty \boldsymbol{A}^i$ computes the total weight of paths of length $0, 1, \ldots$ and adds them up.</p>
+</details>
+<div class="pseudocode">
+<p><strong>Algorithm 1</strong> $\SolveLinearName$: Solve a right-linear grammar $\mathcal{G}$ by reduction to the matrix star operation</p>
+<p>$$
+\begin{aligned}
+&\textbf{def } \solveLinear{\mathcal{G}}: \\
+&\quad N \gets \text{the nonterminals of } \mathcal{G} \\
+&\quad \boldsymbol{A} \gets \semizero^{N \times N};\ \boldsymbol{b} \gets \semizero^{N} \\
+&\quad \Comment{\text{Assemble the matrix } \boldsymbol{A} \text{ and vector } \boldsymbol{b} \text{ for the right-linear solver}} \\
+&\quad \textbf{for } (X \xrightarrow{\w} Y_1 \cdots Y_K) \in \mathcal{G}: \\
+&\quad\quad \textbf{if } Y_1 \cdots Y_K \text{ are all terminals}: \\
+&\quad\quad\quad \boldsymbol{b}_{X} \mathrel{\oplus}= \w \\
+&\quad\quad \textbf{elif } Y_1 \cdots Y_K = a_1 \cdots a_{K-1}\, Y \text{ where } a_1, \ldots, a_{K-1} \text{ are terminals}: \\
+&\quad\quad\quad \boldsymbol{A}_{X, Y} \mathrel{\oplus}= \w \\
+&\quad\quad \textbf{else}: \\
+&\quad\quad\quad \textbf{raise } \text{Error}(\text{“grammar is not right linear”}) \\
+&\quad \Comment{\text{Solve the right-linear system with the matrix star operation}} \\
+&\quad \boldsymbol{s} \gets \kleene{\boldsymbol{A}}\, \boldsymbol{b} \\
+&\quad \Comment{\text{Convert solution vector } \boldsymbol{s} \text{ into a chart in the obvious way}} \\
+&\quad \Chart \gets \NewGrammar \\
+&\quad \textbf{for } X \in N: \Chart[X] \mathrel{\oplus}= \boldsymbol{s}_X \\
+&\quad \textbf{return } \Chart
+\end{aligned}
+$$</p>
+</div>
+<p>The matrix star runs in $\mathcal{O}(|N|^3)$ time and can be made to run in $\mathcal{O}(|N|^2)$ space.<label class="sidenote-number"></label><span class="margin-note">Sub-cubic algorithms exist when $\Values$ is a <em>ring</em>, e.g., <a href="https://doi.org/10.1007/BF02165411">Strassen (1969)</a>.</span>  The runtime can be improved by decomposition into strongly connected components.<label class="sidenote-number"></label><span class="margin-note">The SCC-based algorithms for transitive closure date back to <a href="https://doi.org/10.1007/BF01940892">Purdom (1970)</a>.</span>  Note that there is a speed–accuracy tradeoff when using the right-linear solver.  Often fixpoint iteration can reach a tolerable level of accuracy faster than the exact algorithm.<label class="sidenote-number"></label><span class="margin-note">The convergence rate of fixpoint iteration depends on the properties of the $\boldsymbol{A}$ matrix.  In the case of the real semiring, we can bound the number of iterations to reach a given error tolerance in terms of the spectral radius of $\boldsymbol{A}$.</span></p>
+<h2 id="code">Code</h2>
+<p>$\SolveLinearName$ is <a href="https://github.com/timvieira/semiring-newton/blob/main/newton/hybrid.py"><code>solve_linear</code> in <code>newton/hybrid.py</code></a>.  It takes a linear grammar (every right-hand side has at most one symbol, after terminals have been folded into the weights, which uses commutativity), assembles $\boldsymbol{A}$ and $\boldsymbol{b}$, and computes $\kleene{\boldsymbol{A}}\, \boldsymbol{b}$ with Lehmann's algorithm (<code>cfg._lehmann</code>, from the <a href="https://github.com/rycolab/left-corner"><code>leftcorner</code></a> package):</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">solve_linear</span><span class="p">(</span><span class="n">sub</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Solve a (right-)linear grammar, x = b ⊕ A x, by the matrix star:</span>
+<span class="sd">    x = A⋆ b, computed with Lehmann's algorithm.</span>
+<span class="sd">    """</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">sub</span><span class="o">.</span><span class="n">R</span>
+    <span class="n">A</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">R</span><span class="o">.</span><span class="n">chart</span><span class="p">(),</span> <span class="n">R</span><span class="o">.</span><span class="n">chart</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">sub</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">body</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">b</span><span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">head</span><span class="p">]</span> <span class="o">+=</span> <span class="n">r</span><span class="o">.</span><span class="n">w</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="p">[</span><span class="n">Y</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">body</span>
+            <span class="n">A</span><span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">head</span><span class="p">,</span> <span class="n">Y</span><span class="p">]</span> <span class="o">+=</span> <span class="n">r</span><span class="o">.</span><span class="n">w</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">sub</span><span class="o">.</span><span class="n">N</span><span class="p">)</span>
+    <span class="n">K</span> <span class="o">=</span> <span class="n">sub</span><span class="o">.</span><span class="n">_lehmann</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">A</span><span class="p">)</span>
+    <span class="n">sol</span> <span class="o">=</span> <span class="n">Chart</span><span class="p">(</span><span class="n">R</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">X</span> <span class="ow">in</span> <span class="n">N</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">Y</span> <span class="ow">in</span> <span class="n">N</span><span class="p">:</span>
+            <span class="n">sol</span><span class="p">[</span><span class="n">X</span><span class="p">]</span> <span class="o">+=</span> <span class="n">K</span><span class="p">[</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">]</span> <span class="o">*</span> <span class="n">b</span><span class="p">[</span><span class="n">Y</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">sol</span>
+</code></pre></div>
+
+<h2 id="references">References</h2>
+<ul>
+<li>Volker Strassen. <a href="https://doi.org/10.1007/BF02165411">Gaussian Elimination is Not Optimal</a>. Numerische Mathematik, 1969.</li>
+<li>Daniel J. Lehmann. <a href="https://doi.org/10.1016/0304-3975(77)90056-1">Algebraic Structures for Transitive Closure</a>. Theoretical Computer Science, 1977.</li>
+<li>Robert E. Tarjan. <a href="https://doi.org/10.1145/322261.322272">A Unified Approach to Path Problems</a>. JACM 1981.</li>
+<li>Tim Vieira. <a href="https://timvieira.github.io/doc/2023-timv-dissertation.pdf">Automating the Analysis and Improvement of Dynamic Programming Algorithms with Applications to Natural Language Processing</a>. PhD thesis, 2023.</li>
+</ul>
+    </div>
+    
+  </article>
+
+  <!--
+  <section>
+    <h1 class="comments">Comments</h1>
+    <div id="disqus_thread" aria-live="polite">
+      <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+  </section>
+  -->
+</div>
+
+
+
+      
+    </div>
+  </div>
+  <footer role="contentinfo"></footer>
+  <!--
+  
+  <script type="text/javascript">
+    var disqus_shortname = 'graduatedescent';
+    var disqus_identifier = 'https://timvieira.github.io/blog/solving-linear-grammars-exactly/';
+    var disqus_url = 'https://timvieira.github.io/blog/solving-linear-grammars-exactly/';
+    var disqus_title = 'Solving Linear Grammars Exactly';
+    (function() {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = "//" + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  
+  -->
+  
+<script>
+// Toggle sidenotes on narrow screens
+document.querySelectorAll('.sidenote-number').forEach(function(el) {
+  el.addEventListener('click', function() {
+    el.classList.toggle('active');
+  });
+});
+</script>
+</body>
+</html>

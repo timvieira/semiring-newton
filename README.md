@@ -21,6 +21,12 @@ This package implements a solver based on Newton's method for solving fixpoint s
 * [Exact Recursive Probabilistic Programming](https://arxiv.org/abs/2210.01206). David Chiang, Colin McDonald, Chung-chieh Shan
 
 
-## Blog post (draft)
+## Blog posts (draft series)
 
-`content/semiring-newton.md` is a draft blog post explaining the algorithm for weighted grammars. Build it with the `blog` CLI from [timvieira/blog](https://github.com/timvieira/blog) (`blog build` or `blog dev`; output goes to `docs/`, which GitHub Pages serves). `tests/test_post.py` checks the claims the post makes.
+`content/` holds a three-part draft series, adapted from chapter 5 of the dissertation:
+
+1. `weighted-grammars-as-algebraic-systems.md`: the problem, and why fixpoint iteration can be slow
+2. `solving-linear-grammars-exactly.md`: the right-linear solver (matrix star)
+3. `newtons-method-for-weighted-grammars.md`: Newton's method, the hybrid SCC solver, and code
+
+Build them with the `blog` CLI from [timvieira/blog](https://github.com/timvieira/blog) (`blog build` or `blog dev`; output goes to `docs/`, which GitHub Pages serves).  `content/make_figures.py` draws the figures, and `tests/test_post.py` checks the claims the posts make.

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+<head>
+  <meta charset="utf-8">
+  
+  <title>Weighted Grammars as Algebraic Systems &mdash; Graduate Descent</title>
+  
+
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&display=swap"
+        rel="stylesheet">
+
+  <meta name="author" content="Tim Vieira">
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link href="../favicon.png" rel="icon">
+  <link rel="alternate" type="application/atom+xml" title="Graduate Descent Atom Feed" href="../atom.xml">
+  <link rel="stylesheet" href="../pygments.css">
+
+  <link rel="stylesheet" href="/blog/css/blog.css">
+
+  <!-- MathJax 3 -->
+  <script>
+    window.MathJax = {
+      startup: {
+        typeset: false,    // We typeset manually after all widgets have built their DOM
+        ready: function() {
+          MathJax.startup.defaultReady();
+          MathJax.startup.promise.then(function() {
+            // Typeset the full page once MathJax is ready
+            MathJax.typesetPromise();
+          });
+        }
+      },
+      tex: {
+        inlineMath: [['$', '$']],
+        displayMath: [['$$', '$$']],
+        processEscapes: true,
+        macros: {"AddRule": "\\textbf{add } ", "BestSolve": "{\\color{#332288}{\\mathsf{best\\_solve}}}", "Change": "{\\color{#CC6677}{\\mathfrak{d}}}", "Chart": "{\\color{#4617ac}{\\mathfrak{m}}}", "Comment": "\\color{grey}{\\triangleright}\\ \\color{grey}", "Dim": ["\\DimName(#1)", 1], "DimName": "{\\color{#332288}{\\mathsf{dim}}}", "HeightName": "{\\color{#332288}{\\mathsf{height}}}", "KleeneStar": "{\\color{#332288}{\\star}}", "NewGrammar": "\\{\\,\\}", "Newton": "{\\color{#332288}{\\mathsf{newton}}}", "NewtonInit": "{\\color{#332288}{\\mathsf{newton\\_init}}}", "NewtonStep": "{\\color{#332288}{\\mathsf{newton\\_step}}}", "NextChange": "{\\color{#b53389}{\\mathfrak{d}\u0027}}", "NextChart": "{\\color{#882255}{\\mathfrak{m}\u0027}}", "Notation": "\\color{#332288}", "SccName": "{\\color{#332288}{\\mathsf{scc}}}", "Series": "\\Values\\langle\\!\\langle \\Sigma^* \\rangle\\!\\rangle", "SolveLinearName": "{\\color{#332288}{\\mathsf{solve\\_linear}}}", "SolveName": "{\\color{#332288}{\\mathsf{solve}}}", "Values": "{\\color{magenta}{\\mathbb{V}}}", "cPP": "\\color{#b53389}", "dEQ": "{\\color{#CC6677}{=\\!d}}", "dLE": "{\\color{#882255}{\\le\\!d}}", "dLT": "{\\color{#4617ac}{\\lt\\!d}}", "dPP": "{\\color{#b53389}{=\\!d\\!+\\!1}}", "deriv": "\\boldsymbol{\\delta}", "doplus": "\\mathbin{\\color[rgb]{0,0,.5}{\\oplus}}", "dopluseq": "\\mathrel{\\color[rgb]{0,0,.5}{\\oplus\\mkern-2mu\\texttt{=}}}", "dotimes": "\\mathbin{\\color[rgb]{0,0,.5}{\\circ}}", "dotimesdots": "\\dotimes{\\color[rgb]{0,0,.5}{\\cdots}}\\dotimes", "kleene": ["#1^{\\KleeneStar}", 1], "llbracket": "[\\![", "otimes": "\\mathbin{\\circ}", "rrbracket": "]\\!]", "sem": ["{\\color{magenta}{\\llbracket}}#1{\\color{magenta}{\\rrbracket}}", 1], "semione": "{\\color{magenta}{\\underline{1}}}", "semizero": "{\\color{magenta}{\\underline{0}}}", "solveLinear": ["\\SolveLinearName(#1)", 1], "val": "{\\color{magenta}{v}}", "w": "{\\color{magenta}{w}}"},
+      },
+      chtml: {
+        scale: 1,
+      },
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+
+<body>
+  <header role="banner"><hgroup>
+    <h1><a href="https://timvieira.github.io/blog/">Graduate Descent</a></h1>
+    <nav role="navigation">
+      <a href="https://timvieira.github.io/">About</a>
+      <a href="https://timvieira.github.io/blog/">Archive</a>
+    </nav>
+  </hgroup></header>
+  <div id="main">
+    <div id="content">
+
+
+
+<div>
+  <article class="hentry" role="article">
+    <header>
+      <h1 class="entry-title" style="view-transition-name: title-weighted-grammars-as-algebraic-systems">Weighted Grammars as Algebraic Systems</h1>
+      <p class="meta">
+        <time datetime="2026-11-05T00:00:00" pubdate>Nov 05, 2026</time>
+        <span class="byline author vcard">
+          by <span class="fn">Tim Vieira</span>
+        </span>
+        
+        <br>
+        <span class="tags">
+          <a class="tag" href="../index.html#tag=semirings">semirings</a> <a class="tag" href="../index.html#tag=grammars">grammars</a> <a class="tag" href="../index.html#tag=parsing">parsing</a> <a class="tag" href="../index.html#tag=algorithms">algorithms</a> <a class="tag" href="../index.html#tag=dynamic-programming">dynamic-programming</a>
+        </span>
+        
+      </p>
+    </header>
+    <div class="entry-content" style="view-transition-name: article-body">
+      <style>
+.theorem { border-left: 3px solid #c9c2b8; padding: 0.6em 1em; margin: 1.2em 0; background: #fbf8f3; }
+.theorem > :first-child { margin-top: 0; }
+.theorem > :last-child { margin-bottom: 0; }
+.pseudocode mjx-container[display="true"] { text-align: left !important; margin-left: 0.5em !important; font-size: 90% !important; overflow-x: auto; overflow-y: hidden; }
+</style>
+
+<div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px 16px; margin-bottom: 1.5em; border-radius: 4px; font-size: 0.95em;">
+<p style="margin: 0;"><strong>Draft</strong> — This article is a work in progress. Content may change.
+</p></div>
+
+<div class="theorem">
+<p><strong>Solving weighted grammars</strong> is a three-part series adapted from chapter 5 of <a href="https://timvieira.github.io/doc/2023-timv-dissertation.pdf">my dissertation</a>.  This is part 1.</p>
+<ol>
+<li><strong>Weighted Grammars as Algebraic Systems</strong>: the problem, and why fixpoint iteration can be slow</li>
+<li><a href="../solving-linear-grammars-exactly/">Solving Linear Grammars Exactly</a>: an exact solver for (right-)linear grammars via the matrix star</li>
+<li><a href="../newtons-method-for-weighted-grammars/">Newton's Method for Weighted Grammars</a>: Newton's method, a hybrid solver that splits the grammar into strongly connected components, and code</li>
+</ol>
+<p>Background: <a href="/blog/semirings-a-powerful-abstraction-for-dynamic-programming/">semirings</a>.  Proofs, side examples, and background are tucked into collapsible blocks (▸) for readers who want more depth.</p>
+</div>
+<p>A weighted context-free grammar $\mathcal{G}$ over a semiring $\Values$ has nonterminals $\mathcal{N}$, terminals $\Sigma$, and a set of rules $X \xrightarrow{\w} Y_1 \cdots Y_K$, each of which rewrites a nonterminal $X \in \mathcal{N}$ into a sequence of symbols $Y_1 \cdots Y_K \in (\mathcal{N} \cup \Sigma)^*$ with a weight $\w \in \Values$.  The grammar assigns a value $\sem{X} \in \Values$ to each nonterminal $X$: the total weight of all derivations $\deriv$ rooted at $X$,</p>
+<p>$$
+\sem{X} = \bigoplus_{\deriv \in \mathcal{D}(X)} \w(\deriv),
+$$</p>
+<p>where the weight $\w(\deriv)$ of a derivation is the $\otimes$-product of the weights of the rules it uses.  When the grammar is recursive, $\mathcal{D}(X)$ is infinite, and $\sem{\cdot}$ is the least solution to the system of fixpoint equations</p>
+<p>$$
+\sem{X} = \bigoplus_{(X \xrightarrow{\w} Y_1 \cdots Y_K) \in \mathcal{G}} \w \otimes \sem{Y_1} \otimes \cdots \otimes \sem{Y_K},
+$$</p>
+<p>with $\sem{a} = \semione$ for each terminal $a \in \Sigma$.  Note that $\sem{X}$ ignores <em>which strings</em> the derivations yield: it sums the weights of all derivations, whatever their yield.  This total weight (sometimes called the treesum or, for a PCFG, the partition function) is the quantity the algorithms in this series compute.</p>
+<h2 id="grammars-are-algebraic-systems">Grammars are algebraic systems</h2>
+<p>The fixpoint equations of a grammar are an instance of a classical object: an <strong>algebraic system</strong> of equations over a semiring (Chomsky and Schützenberger, 1963; <a href="https://doi.org/10.1007/978-3-540-73208-2_17">Esparza et al., 2007</a>; <a href="https://mediatum.ub.tum.de/doc/1273784/1273784.pdf">Schlund, 2016</a>).  Fix a semiring $\mathbb{S}$ and a vector of $\mathbb{S}$-valued variables $\boldsymbol{x} = (x_1, \ldots, x_n)$.  A <em>monomial</em> is a finite product of constants from $\mathbb{S}$ and variables, such as $c \otimes x_1 \otimes x_2$; a <em>polynomial</em> is a finite sum of monomials; and an algebraic system is a system of equations</p>
+<p>$$
+\boldsymbol{x} = \boldsymbol{f}(\boldsymbol{x}),
+$$</p>
+<p>where each component $f_i$ is a polynomial.  To turn a grammar into an algebraic system, we treat the value $\sem{X}$ of each nonterminal $X$ as an unknown.  (The nonterminal $X$ is a symbol; $\sem{X}$ stands for its semiring value.)  The grammar problem and the algebraic problem are essentially the same problem, but we have to be careful about <em>which</em> semiring $\mathbb{S}$ the system lives in, because there are two natural choices.  They differ in what happens to the terminals:</p>
+<ul>
+<li><strong>Weights only, $\mathbb{S} = \Values$.</strong>  Each terminal is replaced by $\semione$, so it drops out of the monomial.  The least solution is the total weight $\sem{X}$ defined above.</li>
+<li><strong>Weighted languages, $\mathbb{S} = \Series$.</strong>  Here $\Series$ is the semiring of <em>weighted languages</em> (formal power series), i.e., functions $L : \Sigma^* \to \Values$, with $\oplus$ taken pointwise and $\otimes$ given by concatenation, $(L \otimes L')(s) = \bigoplus_{s = u\,v} L(u) \otimes L'(v)$.  A rule weight $\w$ becomes the series that gives the empty string weight $\w$, and a terminal $a$ becomes the series that gives the one-symbol string $a$ weight $\semione$.  The least solution $L_X$ assigns each string $s$ the total weight of the derivations of $X$ that yield $s$.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">grammar</th>
+<th style="text-align: left;">system over $\Values$ (weights only)</th>
+<th style="text-align: left;">system over $\Series$ (weighted languages)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">nonterminal $X$</td>
+<td style="text-align: left;">variable $\sem{X}$</td>
+<td style="text-align: left;">variable $L_X$</td>
+</tr>
+<tr>
+<td style="text-align: left;">terminal $a$</td>
+<td style="text-align: left;">$\semione$ (drops out)</td>
+<td style="text-align: left;">the series $a$ (string $a$ with weight $\semione$)</td>
+</tr>
+<tr>
+<td style="text-align: left;">rule $X \xrightarrow{\w} Y_1 \cdots Y_K$</td>
+<td style="text-align: left;">monomial $\w \otimes \sem{Y_1} \otimes \cdots \otimes \sem{Y_K}$ in $f_X$, where $\sem{a} = \semione$ for a terminal</td>
+<td style="text-align: left;">monomial $\w\, \hat{Y}_1 \cdots \hat{Y}_K$ in $f_X$, in order, where $\hat{Y} = L_Y$ for a nonterminal and $\hat{a} = a$ for a terminal</td>
+</tr>
+<tr>
+<td style="text-align: left;">derivation $\deriv$ with yield $s$</td>
+<td style="text-align: left;">the term $\w(\deriv)$</td>
+<td style="text-align: left;">the term $\w(\deriv)\, s$</td>
+</tr>
+<tr>
+<td style="text-align: left;">least solution</td>
+<td style="text-align: left;">$\sem{X} \in \Values$</td>
+<td style="text-align: left;">$L_X \in \Series$</td>
+</tr>
+</tbody>
+</table>
+<p>The two are related by forgetting the strings: $\sem{X} = \bigoplus_{s \in \Sigma^*} L_X(s)$, i.e., the image of $L_X$ under the homomorphism that sends every terminal to $\semione$.  When $\Values$ is the boolean semiring, a weighted language is just a formal language, $L_X$ is the language generated by $X$, and the least-solution characterization is the observation of Chomsky and Schützenberger.</p>
+<p>This distinction matters for the algorithms below.  Even when $\Values$ is commutative, $\Series$ is <em>not</em> (concatenation does not commute: $a\,b \ne b\,a$).  The algorithms in this series assume a commutative semiring, so they solve the weights-only system for $\sem{\cdot}$; they do not compute the weighted language $L_X$ (<a href="../solving-linear-grammars-exactly/">part 2</a> has a non-commutative example that the right-linear solver cannot handle).</p>
+<p>The fixpoint equations are <em>underspecified</em>: they provide necessary, but not sufficient, conditions for a solution to equal the potentially infinite sum over derivations.</p>
+<details class="derivation">
+<summary>Example: a grammar whose equations have two solutions
+</summary>
+<div class="theorem">
+<p><strong>Example.</strong> The following grammar encodes the Catalan series: $\sem{X} = c + c^2 + 2\,c^3 + 5\,c^4 + 14\,c^5 + 42\,c^6 + \cdots$.</p>
+<p>$$
+\begin{aligned} X &\xrightarrow{1} X\,X \\ X &\xrightarrow{c} a \end{aligned}
+$$</p>
+<p>Its algebraic system is $\sem{X} = \sem{X} \otimes \sem{X} \oplus c$.  Over the real semiring, the system admits <em>two</em> solutions: rearranging gives $\sem{X}^2 - \sem{X} + c = 0$, so $\sem{X} \in \frac{1 \pm \sqrt{1 - 4\,c}}{2}$ by the quadratic formula.  Assuming $0 \le c \le \frac{1}{4}$, the smaller solution $\frac{1 - \sqrt{1 - 4\,c}}{2}$ corresponds to the sum over derivations.  The larger solution $\frac{1 + \sqrt{1 - 4\,c}}{2}$ is a fixpoint, but it is not equal to the sum over derivations.</p>
+</div>
+</details>
+<p>The sum over derivations is the <em>least</em> solution.  In $\omega$-continuous semirings (where all the infinite sums we need are well-defined), Kleene's fixed-point theorem says that the least solution is the limit of the sequence $\boldsymbol{0}, \boldsymbol{f}(\boldsymbol{0}), \boldsymbol{f}(\boldsymbol{f}(\boldsymbol{0})), \ldots$.  Computing that sequence is <strong>fixpoint iteration</strong>, which initializes every variable to $\semizero$ and repeatedly applies the equations above as an update until it converges.  Newton's method, too, is most naturally stated on the algebraic system: it is Newton's method for solving $\boldsymbol{x} = \boldsymbol{f}(\boldsymbol{x})$, retrofitted to semirings.  We stay with the grammar view below because it lets us talk about derivations directly.</p>
+<div class="theorem">
+<p><strong>Proposition.</strong> The estimate at time $t$ given by fixpoint iteration equals the total value of all derivations of height $\le t$.</p>
+</div>
+<details class="derivation">
+<summary>Proof (sketch)
+</summary>
+<p>We start with every nonterminal at $\semizero$.  From there, we build height $\le 1$ derivations from the rules whose right-hand sides contain only terminals.  From there, each application of the update combines the values of height $\le t$ derivations by applying the rules of the grammar to derive the values of all height $\le t\!+\!1$ derivations.<label class="sidenote-number"></label><span class="margin-note">This is a form of dynamic programming: the estimate at time $t$ is a memo table for a version of the computation, which makes the height $t$ an argument to break cycles.</span> $\square$</p>
+</details>
+<p>Assuming the sum is convergent, fixpoint iteration will diligently compute it (up to each height) until every height has been covered; thus, it converges in the limit to $\sem{\cdot}$.</p>
+<h2 id="fixpoint-iteration-can-be-slow">Fixpoint iteration can be slow</h2>
+<p><a href="https://doi.org/10.1145/1462153.1462154">Etessami and Yannakakis (2009)</a> showed that fixpoint iteration could converge exponentially slower than Newton's method.</p>
+<div class="theorem">
+<p><strong>Example.</strong> Consider the following grammar based on <a href="https://doi.org/10.1145/1462153.1462154">Etessami and Yannakakis (2009, Theorem 3.2)</a>.  This grammar has a single fixpoint $\sem{\mathrm{S}} = 1$.<label class="sidenote-number"></label><span class="margin-note">$\frac{1}{2} x^2 - x + \frac{1}{2} = 0$, which, by the quadratic formula ($a\,x^2+b\,x+c=0 \iff x=\frac{-b\pm\sqrt{b^2-4\,a\,c}}{2a}$ with $a \mapsto \frac{1}{2}$, $b \mapsto -1$, $c \mapsto \frac{1}{2}$), has solutions $\{1\}$.</span></p>
+<p>$$
+\begin{aligned} S &\xrightarrow{0.5} S\,S \\ S &\xrightarrow{0.5} a \end{aligned}
+$$</p>
+<p>Etessami and Yannakakis show that fixpoint iteration is exponentially slower than Newton's method in this example.  Specifically, fixpoint iteration requires roughly $2^k$ iterations to gain $k$ bits of precision, whereas Newton's method gains one bit of precision per iteration.  The plot below shows this using the code from <a href="../newtons-method-for-weighted-grammars/">part 3</a>: the error of fixpoint iteration after $n$ iterations is about $2/n$, whereas the error of $\Newton$ after $n$ iterations is $2^{-n}$.</p>
+</div>
+<figure>
+<p><img src="../images/convergence.svg" alt="Log-log plot of error versus iterations on the grammar 0.5: S → S S, 0.5: S → a. Fixpoint iteration's error falls slowly, like 2/n, reaching about 2e-5 after 100,000 iterations; Newton's error falls like 2^-n, reaching about 1e-12 after 40 iterations." style="width:100%"></p>
+</figure>
+
+<h2 id="what-comes-next">What comes next</h2>
+<p>Fixpoint iteration sums derivations by height, one level at a time.  The rest of the series builds faster solvers.  <a href="../solving-linear-grammars-exactly/">Part 2</a> solves <em>linear</em> grammars exactly, in closed form, with the matrix star operation.  <a href="../newtons-method-for-weighted-grammars/">Part 3</a> uses that solver inside Newton's method, which sums derivations by <em>dimension</em> instead of height and gains one bit of precision per iteration on the example above, and then combines everything into a hybrid solver.</p>
+<h2 id="references">References</h2>
+<ul>
+<li>Javier Esparza, Stefan Kiefer, and Michael Luttenberger. <a href="https://doi.org/10.1007/978-3-540-73208-2_17">An Extension of Newton's Method to ω-Continuous Semirings</a>. DLT 2007.</li>
+<li>Kousha Etessami and Mihalis Yannakakis. <a href="https://doi.org/10.1145/1462153.1462154">Recursive Markov Chains, Stochastic Grammars, and Monotone Systems of Nonlinear Equations</a>. JACM 2009.</li>
+<li>Maximilian Schlund. <a href="https://mediatum.ub.tum.de/doc/1273784/1273784.pdf">Algebraic Systems of Fixpoint Equations over Semirings: Theory and Applications</a>. PhD thesis, 2016.</li>
+<li>Noam Chomsky and Marcel-Paul Schützenberger. The Algebraic Theory of Context-Free Languages. In <em>Computer Programming and Formal Systems</em>, North-Holland, 1963.</li>
+<li>Tim Vieira. <a href="https://timvieira.github.io/doc/2023-timv-dissertation.pdf">Automating the Analysis and Improvement of Dynamic Programming Algorithms with Applications to Natural Language Processing</a>. PhD thesis, 2023.</li>
+</ul>
+    </div>
+    
+  </article>
+
+  <!--
+  <section>
+    <h1 class="comments">Comments</h1>
+    <div id="disqus_thread" aria-live="polite">
+      <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+  </section>
+  -->
+</div>
+
+
+
+      
+    </div>
+  </div>
+  <footer role="contentinfo"></footer>
+  <!--
+  
+  <script type="text/javascript">
+    var disqus_shortname = 'graduatedescent';
+    var disqus_identifier = 'https://timvieira.github.io/blog/weighted-grammars-as-algebraic-systems/';
+    var disqus_url = 'https://timvieira.github.io/blog/weighted-grammars-as-algebraic-systems/';
+    var disqus_title = 'Weighted Grammars as Algebraic Systems';
+    (function() {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = "//" + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  
+  -->
+  
+<script>
+// Toggle sidenotes on narrow screens
+document.querySelectorAll('.sidenote-number').forEach(function(el) {
+  el.addEventListener('click', function() {
+    el.classList.toggle('active');
+  });
+});
+</script>
+</body>
+</html>

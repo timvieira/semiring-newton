@@ -1,5 +1,5 @@
 """
-Tests for the claims made in the blog post (content/semiring-newton.md).
+Tests for the claims made in the blog-post series (content/*.md).
 
 If one of these fails, the post is wrong until proven otherwise.
 """
@@ -13,7 +13,11 @@ from newton import newton
 from newton.newton import _newton, linearize
 
 
-POST = Path(__file__).resolve().parent.parent / 'content' / 'semiring-newton.md'
+CONTENT = Path(__file__).resolve().parent.parent / 'content'
+PART1 = CONTENT / 'weighted-grammars-as-algebraic-systems.md'
+PART2 = CONTENT / 'solving-linear-grammars-exactly.md'
+PART3 = CONTENT / 'newtons-method-for-weighted-grammars.md'
+POST = PART3
 
 
 def newton_iterates(cfg, T):
@@ -118,11 +122,26 @@ def test_catalan_example():
     assert x[1:7] == [1, 1, 2, 5, 14, 42]
 
 
+def python_blocks(path):
+    return re.findall(r'```python\n(.*?)```', path.read_text(), re.DOTALL)
+
+
 def test_post_code_matches_source():
-    post = POST.read_text()
-    blocks = re.findall(r'```python\n(.*?)```', post, re.DOTALL)
+    # Code printed in the posts must be exactly the library's source.
+    from newton.hybrid import solve_linear
     for fn in [_newton, linearize]:
-        assert inspect.getsource(fn) in blocks, fn.__name__
+        assert inspect.getsource(fn) in python_blocks(PART3), fn.__name__
+    assert inspect.getsource(solve_linear) in python_blocks(PART2)
+
+
+def test_series_links():
+    # Each part links to the other two parts.
+    slugs = {p: p.stem for p in [PART1, PART2, PART3]}
+    for p in slugs:
+        text = p.read_text()
+        for q, slug in slugs.items():
+            if q != p:
+                assert f'../{slug}/' in text, (p.name, slug)
 
 
 def test_figures_are_up_to_date(tmp_path, monkeypatch):
